@@ -30,54 +30,100 @@
             margin-top: 80px;
         }
 
+        /* Navbar Styles */
         .navbar {
-            background-color: var(--primary-color);
-            padding: 15px 50px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
+            background-color: #3845d5;
+            padding: 0.8rem 2rem;
             transition: all 0.3s ease;
         }
 
-        .navbar.scrolled {
-            padding: 10px 50px;
-            background-color: rgba(0, 59, 123, 0.95);
-            backdrop-filter: blur(10px);
-        }
-
-        .navbar .navbar-brand {
+        .navbar-brand {
             color: white;
-            font-size: 22px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .navbar .navbar-brand:hover {
-            transform: scale(1.05);
+        .navbar-brand i {
+            font-size: 1.4rem;
         }
 
-        .navbar .nav-link {
-            color: white !important;
-            margin: 0 10px;
+        .navbar-brand:hover {
+            color: #fff;
+        }
+
+        .navbar-nav {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
-        .navbar .nav-link::after {
+        .navbar-nav .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+
+        .navbar-nav .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .navbar-nav .nav-link::after {
             content: '';
             position: absolute;
+            bottom: 0;
+            left: 50%;
             width: 0;
             height: 2px;
-            background: var(--secondary-color);
-            bottom: -5px;
-            left: 0;
-            transition: width 0.3s ease;
+            background-color: #4fc3f7;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
         }
 
-        .navbar .nav-link:hover::after {
-            width: 100%;
+        /* Dropdown Styling */
+        .dropdown-menu {
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeInDown 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .metric-card {
@@ -88,6 +134,7 @@
             box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1),
                 -5px -5px 15px rgba(255, 255, 255, 0.8);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
         }
 
         .metric-card:hover {
@@ -171,63 +218,176 @@
             margin-top: 20px;
         }
 
-        /* Animation keyframes */
-        @keyframes fadeInUp {
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .table td,
+        .table th {
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 4px;
+        }
+
+        .badge-medium {
+            background-color: #ffc107;
+            color: #000;
+            padding: 0.4em 0.8em;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .badge-high {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 0.4em 0.8em;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .badge-low {
+            background-color: #28a745;
+            color: #fff;
+            padding: 0.4em 0.8em;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* Modal Table Row Animation */
+        .modal .table tbody tr {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .modal .table tbody tr:hover {
+            background-color: rgba(0, 59, 123, 0.05);
+            transform: translateX(5px);
+        }
+
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
-        @keyframes scaleIn {
-            from {
-                transform: scale(0.9);
-                opacity: 0;
-            }
-
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .animate-scaleIn {
-            animation: scaleIn 0.5s ease-out;
-        }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
+            <!-- Brand -->
             <a class="navbar-brand" href="#">
-                <i class="fas fa-shield-alt me-2"></i>
-                Pertamina Sophos
+                <i class="fas fa-shield-alt"></i>
+                <span>Pertamina Sophos</span>
             </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-bell"></i> Notifications
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-layer-group"></i> Category
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-chart-bar"></i> Reports
-                </a>
-                <!-- Logout Form -->
-                <form action="{{ route('logout') }}" method="POST" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-link btn btn-link text-white">Logout</button>
-                </form>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Nav Items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Dashboards -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboards</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Overview</a></li>
+                            <li><a class="dropdown-item" href="#">Analytics</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Products -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-box"></i>
+                            <span>My Products</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Active Products</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Threat Analysis -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Threat Analysis</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Current Threats</a></li>
+                            <li><a class="dropdown-item" href="#">Reports</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Alerts -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-bell"></i>
+                            <span>Alerts</span>
+                        </a>
+                    </li>
+
+                    <!-- Reports -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+
+                    <!-- User Icons -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -236,19 +396,19 @@
         <!-- Summary Metrics -->
         <div class="row mb-4">
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="metric-card">
+                <div class="metric-card" onclick="fetchDetailData('All Risk')">
                     <i class="fas fa-chart-line fa-2x" style="color: var(--primary-color)"></i>
-                    <div class="metric-value">20</div>
-                    <div class="metric-label">Low Risk</div>
+                    <div class="metric-value">124</div>
+                    <div class="metric-label">Total Alerts</div>
                     <div class="metric-trend trend-up">
                         <i class="fas fa-arrow-up"></i> 37% this week
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="metric-card">
-                    <i class="fas fa-users fa-2x" style="color: var(--secondary-color)"></i>
-                    <div class="metric-value">10</div>
+                <div class="metric-card" onclick="fetchDetailData('High Risk')">
+                    <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--danger-color)"></i>
+                    <div class="metric-value">20</div>
                     <div class="metric-label">High Risk</div>
                     <div class="metric-trend trend-down">
                         <i class="fas fa-arrow-down"></i> 21% this week
@@ -256,22 +416,22 @@
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="metric-card">
-                    <i class="fas fa-percentage fa-2x" style="color: var(--success-color)"></i>
-                    <div class="metric-value">4.7%</div>
-                    <div class="metric-label">Traffic Overview</div>
+                <div class="metric-card" onclick="fetchDetailData('Medium Risk')">
+                    <i class="fas fa-exclamation-circle fa-2x" style="color: var(--warning-color)"></i>
+                    <div class="metric-value">104</div>
+                    <div class="metric-label">Medium Risk</div>
                     <div class="metric-trend trend-up">
-                        <i class="fas fa-arrow-up"></i> 41% this week
+                        <i class="fas fa-arrow-up"></i> 15% this week
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
-                <div class="metric-card">
-                    <i class="fas fa-clock fa-2x" style="color: var(--warning-color)"></i>
-                    <div class="metric-value">6m 18s</div>
-                    <div class="metric-label">Avg. Time on Site</div>
+                <div class="metric-card" onclick="fetchDetailData('Low Risk')">
+                    <i class="fas fa-info-circle fa-2x" style="color: var(--success-color)"></i>
+                    <div class="metric-value">0</div>
+                    <div class="metric-label">Low Risk</div>
                     <div class="metric-trend trend-down">
-                        <i class="fas fa-arrow-down"></i> 15% this week
+                        <i class="fas fa-arrow-down"></i> 0% this week
                     </div>
                 </div>
             </div>
@@ -322,6 +482,41 @@
         </div>
     </div>
 
+    <!-- Modal Template -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalLabel">Detail Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">ID</th>
+                                    <th style="width: 15%">Category</th>
+                                    <th style="width: 30%">Description</th>
+                                    <th style="width: 10%">Severity</th>
+                                    <th style="width: 15%">Raised At</th>
+                                    <th style="width: 15%">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailTableBody">
+                                <!-- Data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Initialize AOS
         AOS.init({
@@ -329,14 +524,100 @@
             once: true
         });
 
-        // Navbar Scroll Effect
-        window.addEventListener('scroll', function () {
-            if (window.scrollY > 50) {
-                document.querySelector('.navbar').classList.add('scrolled');
-            } else {
-                document.querySelector('.navbar').classList.remove('scrolled');
+        // Function to populate the modal with data
+        function fetchDetailData(category) {
+            const data = [
+                {
+                    id: "3e1a006e-7508-443c-9e13-f65dc57f0e39",
+                    category: "pua",
+                    description: "Manual PUA cleanup required: 'PsExec' at 'D:\\3. Umum\\BACKUP DATA LAPTOP\\Data D\\99. Backup Data Separo\\Driver\\Drivers\\DP_Touchpad_Elan_13085.7z'",
+                    severity: "Medium",
+                    raisedAt: "2024-12-30T03:09:40.461Z",
+                    type: "Event::Endpoint"
+                },
+                {
+                    id: "ac0cd024-6815-48b1-8059-aad8b9e53f51",
+                    category: "pua",
+                    description: "Manual PUA cleanup required: 'PsKill' at 'C:\\Users\\faisal.ardhy\\Downloads\\PSTools.zip'",
+                    severity: "High",
+                    raisedAt: "2024-12-30T07:47:36.095Z",
+                    type: "Event::Endpoint"
+                }
+            ];
+
+            const tableBody = document.getElementById('detailTableBody');
+            tableBody.innerHTML = '';
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.style.animationDelay = `${index * 0.1}s`;
+                row.innerHTML = `
+                    <td class="text-muted">${item.id}</td>
+                    <td>${item.category}</td>
+                    <td>${item.description}</td>
+                    <td><span class="badge badge-medium">${item.severity}</span></td>
+                    <td>${new Date(item.raisedAt).toLocaleString()}</td>
+                    <td>${item.type}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+            detailModal.show();
+        }
+    </script>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Initialize AOS
+    AOS.init({
+        duration: 800,
+        once: true
+    });
+
+    // Function to populate the modal with data
+    function fetchDetailData(category) {
+        const data = [
+            {
+                id: "3e1a006e-7508-443c-9e13-f65dc57f0e39",
+                category: "pua",
+                description: "Manual PUA cleanup required: 'PsExec' at 'D:\\3. Umum\\BACKUP DATA LAPTOP\\Data D\\99. Backup Data Separo\\Driver\\Drivers\\DP_Touchpad_Elan_13085.7z'",
+                severity: "Medium",
+                raisedAt: "2024-12-30T03:09:40.461Z",
+                type: "Event::Endpoint"
+            },
+            {
+                id: "ac0cd024-6815-48b1-8059-aad8b9e53f51",
+                category: "pua",
+                description: "Manual PUA cleanup required: 'PsKill' at 'C:\\Users\\faisal.ardhy\\Downloads\\PSTools.zip'",
+                severity: "High",
+                raisedAt: "2024-12-30T07:47:36.095Z",
+                type: "Event::Endpoint"
             }
+        ];
+
+        const tableBody = document.getElementById('detailTableBody');
+        tableBody.innerHTML = '';
+
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.style.animationDelay = `${index * 0.1}s`;
+            row.innerHTML = `
+                <td class="text-muted">${item.id}</td>
+                <td>${item.category}</td>
+                <td>${item.description}</td>
+                <td><span class="badge badge-${item.severity.toLowerCase()}">${item.severity}</span></td>
+                <td>${new Date(item.raisedAt).toLocaleString()}</td>
+                <td>${item.type}</td>
+            `;
+            tableBody.appendChild(row);
         });
+
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        detailModal.show();
+    }
+
 
         // Chart.js Global Configuration
         Chart.defaults.font.family = 'Poppins';
