@@ -218,91 +218,108 @@
             margin-top: 20px;
         }
 
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 16px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
+        .modal-dialog.modal-lg {
+    max-width: 90%; /* Memperbesar ukuran modal */
+}
 
-        .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            padding: 1rem 1.5rem;
-        }
+.modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
 
-        .modal-header .btn-close {
-            filter: brightness(0) invert(1);
-        }
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    padding: 0.75rem 1.5rem; /* Mengurangi padding */
+}
 
-        .table {
-            margin-bottom: 0;
-        }
+.modal-body {
+    padding: 1rem; /* Mengurangi padding */
+}
 
-        .table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-        }
+/* Table Styles dalam Modal */
+.modal .table {
+    margin-bottom: 0;
+    font-size: 0.85rem; /* Memperkecil ukuran font tabel */
+}
 
-        .table td,
-        .table th {
-            padding: 1rem;
-            vertical-align: middle;
-        }
+.modal .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    white-space: nowrap; /* Mencegah wrapping pada header */
+    padding: 0.5rem; /* Mengurangi padding */
+}
 
-        .btn-sm {
-            padding: 0.25rem 0.75rem;
-            font-size: 0.875rem;
-            border-radius: 4px;
-        }
+.modal .table td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
 
-        .badge-medium {
-            background-color: #ffc107;
-            color: #000;
-            padding: 0.4em 0.8em;
-            border-radius: 4px;
-            font-weight: 500;
-        }
+.modal .table td.description-cell {
+    max-width: 400px; /* Mengatur lebar maksimum kolom deskripsi */
+    white-space: normal; /* Mengizinkan text wrapping */
+    word-break: break-word; /* Memastikan kata panjang bisa wrap */
+}
 
-        .badge-high {
-            background-color: #dc3545;
-            color: #fff;
-            padding: 0.4em 0.8em;
-            border-radius: 4px;
-            font-weight: 500;
-        }
+/* Tambahkan style ini di bagian CSS */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 
-        .badge-low {
-            background-color: #28a745;
-            color: #fff;
-            padding: 0.4em 0.8em;
-            border-radius: 4px;
-            font-weight: 500;
-        }
+.modal .table tbody tr {
+    animation: slideInRight 0.5s ease-in-out;
+    animation-fill-mode: both;
+    transition: all 0.3s ease;
+}
 
-        /* Modal Table Row Animation */
-        .modal .table tbody tr {
-            transition: all 0.3s ease;
-            animation: fadeIn 0.5s ease-in-out;
-        }
+.modal .table tbody tr:hover {
+    background-color: rgba(0, 59, 123, 0.05);
+    transform: translateX(5px);
+}
 
-        .modal .table tbody tr:hover {
-            background-color: rgba(0, 59, 123, 0.05);
-            transform: translateX(5px);
-        }
+/* Animasi untuk modal */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: scale(0.95);
+}
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.4em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.badge-high {
+    color: #fff !important;
+}
+
+.badge-medium {
+    color: #000 !important;
+}
+
+.badge-low {
+    color: #fff !important;
+}
+
+.badge-secondary {
+    color: #fff !important;
+}
     </style>
 </head>
 
@@ -398,40 +415,44 @@
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="metric-card" onclick="fetchDetailData('All Risk')">
                     <i class="fas fa-chart-line fa-2x" style="color: var(--primary-color)"></i>
-                    <div class="metric-value">124</div>
+                    <div class="metric-value">{{ $riskData['total'] ?? 0 }}</div>
                     <div class="metric-label">Total Alerts</div>
-                    <div class="metric-trend trend-up">
-                        <i class="fas fa-arrow-up"></i> 37% this week
+                    <div class="metric-trend {{ isset($riskData['weeklyChange']['total']) && str_contains($riskData['weeklyChange']['total'], '-') ? 'trend-down' : 'trend-up' }}">
+                        <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['total']) && str_contains($riskData['weeklyChange']['total'], '-') ? 'down' : 'up' }}"></i>
+                        {{ $riskData['weeklyChange']['total'] ?? '0% this week' }}
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
                 <div class="metric-card" onclick="fetchDetailData('High Risk')">
                     <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--danger-color)"></i>
-                    <div class="metric-value">20</div>
+                    <div class="metric-value">{{ $riskData['high'] ?? 0 }}</div>
                     <div class="metric-label">High Risk</div>
-                    <div class="metric-trend trend-down">
-                        <i class="fas fa-arrow-down"></i> 21% this week
+                    <div class="metric-trend {{ isset($riskData['weeklyChange']['high']) && str_contains($riskData['weeklyChange']['high'], '-') ? 'trend-down' : 'trend-up' }}">
+                        <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['high']) && str_contains($riskData['weeklyChange']['high'], '-') ? 'down' : 'up' }}"></i>
+                        {{ $riskData['weeklyChange']['high'] ?? '0% this week' }}
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
                 <div class="metric-card" onclick="fetchDetailData('Medium Risk')">
                     <i class="fas fa-exclamation-circle fa-2x" style="color: var(--warning-color)"></i>
-                    <div class="metric-value">104</div>
+                    <div class="metric-value">{{ $riskData['medium'] ?? 0 }}</div>
                     <div class="metric-label">Medium Risk</div>
-                    <div class="metric-trend trend-up">
-                        <i class="fas fa-arrow-up"></i> 15% this week
+                    <div class="metric-trend {{ isset($riskData['weeklyChange']['medium']) && str_contains($riskData['weeklyChange']['medium'], '-') ? 'trend-down' : 'trend-up' }}">
+                        <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['medium']) && str_contains($riskData['weeklyChange']['medium'], '-') ? 'down' : 'up' }}"></i>
+                        {{ $riskData['weeklyChange']['medium'] ?? '0% this week' }}
                     </div>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
                 <div class="metric-card" onclick="fetchDetailData('Low Risk')">
                     <i class="fas fa-info-circle fa-2x" style="color: var(--success-color)"></i>
-                    <div class="metric-value">0</div>
+                    <div class="metric-value">{{ $riskData['low'] ?? 0 }}</div>
                     <div class="metric-label">Low Risk</div>
-                    <div class="metric-trend trend-down">
-                        <i class="fas fa-arrow-down"></i> 0% this week
+                    <div class="metric-trend {{ isset($riskData['weeklyChange']['low']) && str_contains($riskData['weeklyChange']['low'], '-') ? 'trend-down' : 'trend-up' }}">
+                        <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['low']) && str_contains($riskData['weeklyChange']['low'], '-') ? 'down' : 'up' }}"></i>
+                        {{ $riskData['weeklyChange']['low'] ?? '0% this week' }}
                     </div>
                 </div>
             </div>
@@ -473,16 +494,22 @@
             </div>
         </div>
 
-        <!-- Conversion Rate -->
-        <div class="dashboard-card" data-aos="fade-up">
-            <h5><i class="fas fa-funnel-dollar me-2"></i>CONVERSION RATE BY CHANNELS</h5>
-            <div class="chart-container">
-                <canvas id="conversionChart"></canvas>
+        @if(config('app.debug'))
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">API Status</h5>
+                </div>
+                <div class="card-body">
+                    <pre>{{ json_encode($riskData ?? [], JSON_PRETTY_PRINT) }}</pre>
+                </div>
             </div>
         </div>
+        @endif
+
     </div>
 
-    <!-- Modal Template -->
+    <!-- Alert Details Modal -->
     <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -495,12 +522,12 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th style="width: 15%">ID</th>
-                                    <th style="width: 15%">Category</th>
-                                    <th style="width: 30%">Description</th>
-                                    <th style="width: 10%">Severity</th>
-                                    <th style="width: 15%">Raised At</th>
-                                    <th style="width: 15%">Type</th>
+                                    <th width="15%">ID</th>
+                                    <th width="10%">Category</th>
+                                    <th width="40%">Description</th>
+                                    <th width="10%">Severity</th>
+                                    <th width="15%">Raised At</th>
+                                    <th width="10%">Type</th>
                                 </tr>
                             </thead>
                             <tbody id="detailTableBody">
@@ -516,6 +543,7 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Initialize AOS
@@ -526,100 +554,80 @@
 
         // Function to populate the modal with data
         function fetchDetailData(category) {
-            const data = [
-                {
-                    id: "3e1a006e-7508-443c-9e13-f65dc57f0e39",
-                    category: "pua",
-                    description: "Manual PUA cleanup required: 'PsExec' at 'D:\\3. Umum\\BACKUP DATA LAPTOP\\Data D\\99. Backup Data Separo\\Driver\\Drivers\\DP_Touchpad_Elan_13085.7z'",
-                    severity: "Medium",
-                    raisedAt: "2024-12-30T03:09:40.461Z",
-                    type: "Event::Endpoint"
-                },
-                {
-                    id: "ac0cd024-6815-48b1-8059-aad8b9e53f51",
-                    category: "pua",
-                    description: "Manual PUA cleanup required: 'PsKill' at 'C:\\Users\\faisal.ardhy\\Downloads\\PSTools.zip'",
-                    severity: "High",
-                    raisedAt: "2024-12-30T07:47:36.095Z",
-                    type: "Event::Endpoint"
-                }
-            ];
+    const tableBody = document.getElementById('detailTableBody');
+    tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
 
-            const tableBody = document.getElementById('detailTableBody');
+    const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+    detailModal.show();
+
+    fetch(`/alerts/${encodeURIComponent(category.toLowerCase())}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || `HTTP error! status: ${response.status}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
             tableBody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No alerts found for this category</td></tr>';
+                return;
+            }
 
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
+                // Tambahkan delay untuk animasi bertahap
                 row.style.animationDelay = `${index * 0.1}s`;
+                row.style.animationFillMode = 'both';
+                
+                let severityClass;
+                switch(item.severity?.toLowerCase()) {
+                    case 'high':
+                        severityClass = 'badge-high bg-danger';
+                        break;
+                    case 'medium':
+                        severityClass = 'badge-medium bg-warning';
+                        break;
+                    case 'low':
+                        severityClass = 'badge-low bg-success';
+                        break;
+                    default:
+                        severityClass = 'badge-secondary bg-secondary';
+                }
+
                 row.innerHTML = `
-                    <td class="text-muted">${item.id}</td>
-                    <td>${item.category}</td>
-                    <td>${item.description}</td>
-                    <td><span class="badge badge-medium">${item.severity}</span></td>
-                    <td>${new Date(item.raisedAt).toLocaleString()}</td>
-                    <td>${item.type}</td>
+                    <td class="text-muted small">${item.id || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td class="description-cell">${item.description || '-'}</td>
+                    <td><span class="badge ${severityClass}">${item.severity || '-'}</span></td>
+                    <td class="small">${item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-'}</td>
+                    <td class="small">${item.type || '-'}</td>
                 `;
+
+                // Tambahkan class untuk animasi
+                row.classList.add('animated-row');
                 tableBody.appendChild(row);
             });
-
-            const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-            detailModal.show();
-        }
-    </script>
-</body>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Initialize AOS
-    AOS.init({
-        duration: 800,
-        once: true
-    });
-
-    // Function to populate the modal with data
-    function fetchDetailData(category) {
-        const data = [
-            {
-                id: "3e1a006e-7508-443c-9e13-f65dc57f0e39",
-                category: "pua",
-                description: "Manual PUA cleanup required: 'PsExec' at 'D:\\3. Umum\\BACKUP DATA LAPTOP\\Data D\\99. Backup Data Separo\\Driver\\Drivers\\DP_Touchpad_Elan_13085.7z'",
-                severity: "Medium",
-                raisedAt: "2024-12-30T03:09:40.461Z",
-                type: "Event::Endpoint"
-            },
-            {
-                id: "ac0cd024-6815-48b1-8059-aad8b9e53f51",
-                category: "pua",
-                description: "Manual PUA cleanup required: 'PsKill' at 'C:\\Users\\faisal.ardhy\\Downloads\\PSTools.zip'",
-                severity: "High",
-                raisedAt: "2024-12-30T07:47:36.095Z",
-                type: "Event::Endpoint"
-            }
-        ];
-
-        const tableBody = document.getElementById('detailTableBody');
-        tableBody.innerHTML = '';
-
-        data.forEach((item, index) => {
-            const row = document.createElement('tr');
-            row.style.animationDelay = `${index * 0.1}s`;
-            row.innerHTML = `
-                <td class="text-muted">${item.id}</td>
-                <td>${item.category}</td>
-                <td>${item.description}</td>
-                <td><span class="badge badge-${item.severity.toLowerCase()}">${item.severity}</span></td>
-                <td>${new Date(item.raisedAt).toLocaleString()}</td>
-                <td>${item.type}</td>
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-danger">
+                        <div class="alert alert-danger mb-0">
+                            <strong>Error:</strong> ${error.message}<br>
+                            Please try again later or contact support if the problem persists.
+                        </div>
+                    </td>
+                </tr>
             `;
-            tableBody.appendChild(row);
         });
+}
 
-        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-        detailModal.show();
-    }
-
-
-        // Chart.js Global Configuration
+        // Chart.js Configuration
         Chart.defaults.font.family = 'Poppins';
         Chart.defaults.color = '#666';
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
@@ -651,13 +659,19 @@
             }
         };
 
-        // Low Risk Chart
+        // Calculate percentages based on actual data
+        const totalRisk = {{ $riskData['total'] ?? 0 }};
+        const highRisk = {{ $riskData['high'] ?? 0 }};
+        const mediumRisk = {{ $riskData['medium'] ?? 0 }};
+        const lowRisk = {{ $riskData['low'] ?? 0 }};
+
+        // Create doughnut charts
         new Chart(document.getElementById('lowRiskChart'), {
             type: 'doughnut',
             data: {
                 labels: ['Low Risk', 'Other'],
                 datasets: [{
-                    data: [70, 30],
+                    data: [lowRisk, totalRisk - lowRisk],
                     backgroundColor: [
                         'rgba(40, 167, 69, 0.8)',
                         'rgba(233, 236, 239, 0.5)'
@@ -668,13 +682,12 @@
             options: riskChartOptions
         });
 
-        // Medium Risk Chart
         new Chart(document.getElementById('mediumRiskChart'), {
             type: 'doughnut',
             data: {
                 labels: ['Medium Risk', 'Other'],
                 datasets: [{
-                    data: [50, 50],
+                    data: [mediumRisk, totalRisk - mediumRisk],
                     backgroundColor: [
                         'rgba(255, 193, 7, 0.8)',
                         'rgba(233, 236, 239, 0.5)'
@@ -685,13 +698,12 @@
             options: riskChartOptions
         });
 
-        // High Risk Chart
         new Chart(document.getElementById('highRiskChart'), {
             type: 'doughnut',
             data: {
                 labels: ['High Risk', 'Other'],
                 datasets: [{
-                    data: [30, 70],
+                    data: [highRisk, totalRisk - highRisk],
                     backgroundColor: [
                         'rgba(220, 53, 69, 0.8)',
                         'rgba(233, 236, 239, 0.5)'
@@ -775,87 +787,6 @@
                 }
             }
         });
-
-        // Conversion Rate Chart
-        new Chart(document.getElementById('conversionChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Email', 'Social Media', 'SEO', 'Direct'],
-                datasets: [{
-                    label: 'Conversion Rate',
-                    data: [12, 19, 8, 15],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.8)',
-                        'rgba(0, 191, 255, 0.8)',
-                        'rgba(255, 193, 7, 0.8)',
-                        'rgba(0, 59, 123, 0.8)'
-                    ],
-                    borderWidth: 0,
-                    borderRadius: 6,
-                    hoverBackgroundColor: [
-                        'rgb(40, 167, 69)',
-                        'rgb(0, 191, 255)',
-                        'rgb(255, 193, 7)',
-                        'rgb(0, 59, 123)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animations: {
-                    y: {
-                        duration: 2000,
-                        easing: 'easeOutElastic'
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.raw}% Conversion Rate`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            },
-                            callback: function (value) {
-                                return value + '%';
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                }
-            }
-        });
     </script>
 </body>
-
 </html>
