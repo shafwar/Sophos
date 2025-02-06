@@ -24,3 +24,11 @@ Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name(
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); // Menggunakan controller DashboardController
 });
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/alerts/{category}', [DashboardController::class, 'getAlertsByCategory']);
+    Route::get('/metrics', [DashboardController::class, 'getMetrics']);
+    
+});
