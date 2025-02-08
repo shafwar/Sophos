@@ -15,6 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 
     <style>
+        /* Root Variables */
         :root {
             --primary-color: #003B7B;
             --secondary-color: #00BFFF;
@@ -24,6 +25,7 @@
             --danger-color: #dc3545;
         }
 
+        /* Base Styles */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--accent-color);
@@ -93,7 +95,7 @@
             transform: translateX(-50%);
         }
 
-        /* Dropdown Styling */
+        /* Dropdown Styles */
         .dropdown-menu {
             background-color: white;
             border: none;
@@ -104,6 +106,8 @@
         }
 
         .dropdown-item {
+            display: flex;
+            align-items: center;
             padding: 0.7rem 1.2rem;
             transition: all 0.2s ease;
         }
@@ -111,18 +115,6 @@
         .dropdown-item:hover {
             background-color: #f5f5f5;
             transform: translateX(5px);
-        }
-
-        /* Dropdown menu styling */
-        .dropdown-menu-end {
-            right: 0;
-            left: auto;
-        }
-
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            padding: 0.7rem 1.2rem;
         }
 
         .dropdown-item i {
@@ -139,7 +131,11 @@
             background-color: rgba(220, 53, 69, 0.1);
         }
 
-        /* Form inside dropdown */
+        .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
         .dropdown-item button {
             background: none;
             border: none;
@@ -150,19 +146,7 @@
             align-items: center;
         }
 
-        /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        /* Metric Card Styles */
         .metric-card {
             background: linear-gradient(145deg, #ffffff, #f5f5f5);
             border-radius: 16px;
@@ -183,7 +167,6 @@
         .metric-value {
             font-size: 32px;
             font-weight: 700;
-            color: var(--primary-color);
             margin: 15px 0;
             background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
@@ -216,6 +199,7 @@
             color: var(--danger-color);
         }
 
+        /* Dashboard Card Styles */
         .dashboard-card {
             background: white;
             border-radius: 16px;
@@ -255,108 +239,207 @@
             margin-top: 20px;
         }
 
+        /* Modal Styles */
         .modal-dialog.modal-lg {
-    max-width: 90%; /* Memperbesar ukuran modal */
-}
+            max-width: 90%;
+        }
 
-.modal-content {
-    border-radius: 16px;
-    border: none;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
 
-.modal-header {
-    background-color: var(--primary-color);
-    color: white;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-    padding: 0.75rem 1.5rem; /* Mengurangi padding */
-}
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 0.75rem 1.5rem;
+        }
 
-.modal-body {
-    padding: 1rem; /* Mengurangi padding */
-}
+        .modal-body {
+            padding: 1rem;
+        }
 
-/* Table Styles dalam Modal */
-.modal .table {
-    margin-bottom: 0;
-    font-size: 0.85rem; /* Memperkecil ukuran font tabel */
-}
+        /* Table Styles in Modal */
+        .modal .table {
+            margin-bottom: 0;
+            font-size: 0.85rem;
+        }
 
-.modal .table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    white-space: nowrap; /* Mencegah wrapping pada header */
-    padding: 0.5rem; /* Mengurangi padding */
-}
+        .modal .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 0.5rem;
+        }
 
-.modal .table td {
-    padding: 0.5rem;
-    vertical-align: middle;
-}
+        .modal .table td {
+            padding: 0.5rem;
+            vertical-align: middle;
+        }
 
-.modal .table td.description-cell {
-    max-width: 400px; /* Mengatur lebar maksimum kolom deskripsi */
-    white-space: normal; /* Mengizinkan text wrapping */
-    word-break: break-word; /* Memastikan kata panjang bisa wrap */
-}
+        .modal .table td.description-cell {
+            max-width: 400px;
+            white-space: normal;
+            word-break: break-word;
+        }
 
-/* Tambahkan style ini di bagian CSS */
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
+        /* Event Details Modal Specific Styles */
+        #eventDetailsModal .modal-dialog {
+            max-width: 700px;
+        }
 
-.modal .table tbody tr {
-    animation: slideInRight 0.5s ease-in-out;
-    animation-fill-mode: both;
-    transition: all 0.3s ease;
-}
+        #eventDetailsModal .modal-body {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
 
-.modal .table tbody tr:hover {
-    background-color: rgba(0, 59, 123, 0.05);
-    transform: translateX(5px);
-}
+        .event-details {
+            padding: 1rem;
+        }
 
-/* Animasi untuk modal */
-.modal.fade .modal-dialog {
-    transition: transform 0.3s ease-out;
-    transform: scale(0.95);
-}
+        .detail-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
 
-.modal.show .modal-dialog {
-    transform: scale(1);
-}
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+        }
 
-/* Badge Styles */
-.badge {
-    padding: 0.4em 0.8em;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 4px;
-}
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
 
-.badge-high {
-    color: #fff !important;
-}
+        .detail-row:hover {
+            background: #f8f9fa;
+        }
 
-.badge-medium {
-    color: #000 !important;
-}
+        .detail-label {
+            font-weight: 500;
+            min-width: 150px;
+            color: #495057;
+        }
 
-.badge-low {
-    color: #fff !important;
-}
+        .detail-value {
+            flex: 1;
+            color: #212529;
+            word-break: break-word;
+        }
 
-.badge-secondary {
-    color: #fff !important;
-}
+        /* Badge Styles */
+        .badge {
+            padding: 0.4em 0.8em;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        .badge-high {
+            color: #fff !important;
+        }
+
+        .badge-medium {
+            color: #000 !important;
+        }
+
+        .badge-low {
+            color: #fff !important;
+        }
+
+        .badge-secondary {
+            color: #fff !important;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .modal .table tbody tr {
+            animation: slideInRight 0.5s ease-in-out;
+            animation-fill-mode: both;
+            transition: all 0.3s ease;
+        }
+
+        .modal .table tbody tr:hover {
+            background-color: rgba(0, 59, 123, 0.05);
+            transform: translateX(5px);
+        }
+
+        .modal.fade .modal-dialog {
+            transition: transform 0.3s ease-out;
+            transform: scale(0.95);
+        }
+
+        .modal.show .modal-dialog {
+            transform: scale(1);
+        }
+
+        /* Close button in modal */
+        .modal .btn-close {
+            opacity: 0.8;
+            filter: brightness(0) invert(1);
+        }
+
+        .modal .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .metric-card {
+                margin-bottom: 1rem;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+            }
+            
+            .detail-label {
+                min-width: 100%;
+                margin-bottom: 0.25rem;
+            }
+            
+            .modal-dialog.modal-lg {
+                max-width: 95%;
+                margin: 0.5rem auto;
+            }
+        }
+
     </style>
 </head>
 
@@ -560,11 +643,11 @@
                             <thead>
                                 <tr>
                                     <th width="15%">ID</th>
-                                    <th width="10%">Category</th>
-                                    <th width="40%">Description</th>
+                                    <th width="15%">Category</th>
+                                    <th width="30%">Description</th>
                                     <th width="10%">Severity</th>
                                     <th width="15%">Raised At</th>
-                                    <th width="10%">Type</th>
+                                    <th width="15%">Details</th>
                                 </tr>
                             </thead>
                             <tbody id="detailTableBody">
@@ -575,6 +658,23 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="eventDetailsContent">
+                        <!-- Details will be inserted here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -616,9 +716,7 @@
 
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
-                // Tambahkan delay untuk animasi bertahap
                 row.style.animationDelay = `${index * 0.1}s`;
-                row.style.animationFillMode = 'both';
                 
                 let severityClass;
                 switch(item.severity?.toLowerCase()) {
@@ -638,14 +736,16 @@
                 row.innerHTML = `
                     <td class="text-muted small">${item.id || '-'}</td>
                     <td>${item.category || '-'}</td>
-                    <td class="description-cell">${item.description || '-'}</td>
+                    <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
                     <td><span class="badge ${severityClass}">${item.severity || '-'}</span></td>
                     <td class="small">${item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-'}</td>
-                    <td class="small">${item.type || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                            View Details
+                        </button>
+                    </td>
                 `;
 
-                // Tambahkan class untuk animasi
-                row.classList.add('animated-row');
                 tableBody.appendChild(row);
             });
         })
@@ -662,6 +762,76 @@
                 </tr>
             `;
         });
+}
+
+function showEventDetails(item) {
+    const detailsContent = document.getElementById('eventDetailsContent');
+    let detailsHtml = `
+        <div class="event-details">
+            <div class="detail-section">
+                <h6 class="section-title">Event Information</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Event Type:</span>
+                    <span class="detail-value">${item.category || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Severity:</span>
+                    <span class="detail-value">
+                        <span class="badge bg-${item.severity === 'high' ? 'danger' : item.severity === 'medium' ? 'warning' : 'success'}">${item.severity || '-'}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span>
+                    <span class="detail-value">${item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description:</span>
+                    <span class="detail-value">${item.description || '-'}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h6 class="section-title">Location & Source</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Location:</span>
+                    <span class="detail-value">${item.location || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Source:</span>
+                    <span class="detail-value">${item.source || '-'}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h6 class="section-title">Endpoint Information</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Endpoint Type:</span>
+                    <span class="detail-value">${item.endpoint_type || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Endpoint ID:</span>
+                    <span class="detail-value">${item.endpoint_id || '-'}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h6 class="section-title">System Information</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Event ID:</span>
+                    <span class="detail-value">${item.id || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Customer ID:</span>
+                    <span class="detail-value">${item.customer_id || '-'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    detailsContent.innerHTML = detailsHtml;
+
+    const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+    eventDetailsModal.show();
 }
 
         // Chart.js Configuration
