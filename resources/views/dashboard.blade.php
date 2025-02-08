@@ -113,6 +113,43 @@
             transform: translateX(5px);
         }
 
+        /* Dropdown menu styling */
+        .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1.2rem;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .dropdown-item.text-danger {
+            color: var(--danger-color) !important;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Form inside dropdown */
+        .dropdown-item button {
+            background: none;
+            border: none;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
         /* Animations */
         @keyframes fadeInDown {
             from {
@@ -399,10 +436,23 @@
                             <i class="fas fa-cog"></i>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user"></i>
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -493,19 +543,6 @@
                 <canvas id="trafficChart"></canvas>
             </div>
         </div>
-
-        @if(config('app.debug'))
-        <div class="container mt-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">API Status</h5>
-                </div>
-                <div class="card-body">
-                    <pre>{{ json_encode($riskData ?? [], JSON_PRETTY_PRINT) }}</pre>
-                </div>
-            </div>
-        </div>
-        @endif
 
     </div>
 
@@ -635,6 +672,42 @@
         Chart.defaults.plugins.tooltip.titleFont = { size: 13 };
         Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
 
+        // Definisikan plugin terlebih dahulu sebelum digunakan
+        const centerTextPlugin = {
+            id: 'centerText',
+            afterDraw: (chart, args, options) => {
+                const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
+                ctx.save();
+                
+                // Get the text value (first value in dataset)
+                const value = chart.data.datasets[0].data[0];
+                
+                // Text styling
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 24px Poppins';
+                
+                // Choose color based on chart ID
+                if (chart.canvas.id === 'lowRiskChart') {
+                    ctx.fillStyle = 'rgba(40, 167, 69, 0.8)';  // Green
+                } else if (chart.canvas.id === 'mediumRiskChart') {
+                    ctx.fillStyle = 'rgba(255, 193, 7, 0.8)';  // Yellow
+                } else {
+                    ctx.fillStyle = 'rgba(220, 53, 69, 0.8)';  // Red
+                }
+                
+                // Draw text in center
+                ctx.fillText(value, left + width / 2, top + height / 2);
+                ctx.restore();
+            }
+        };
+
+        // Calculate percentages based on actual data
+        const totalRisk = {{ $riskData['total'] ?? 0 }};
+        const highRisk = {{ $riskData['high'] ?? 0 }};
+        const mediumRisk = {{ $riskData['medium'] ?? 0 }};
+        const lowRisk = {{ $riskData['low'] ?? 0 }};
+
         // Risk Charts Configuration
         const riskChartOptions = {
             responsive: true,
@@ -659,15 +732,10 @@
             }
         };
 
-        // Calculate percentages based on actual data
-        const totalRisk = {{ $riskData['total'] ?? 0 }};
-        const highRisk = {{ $riskData['high'] ?? 0 }};
-        const mediumRisk = {{ $riskData['medium'] ?? 0 }};
-        const lowRisk = {{ $riskData['low'] ?? 0 }};
-
-        // Create doughnut charts
+        // Create doughnut charts (hapus duplikasi, hanya buat sekali)
         new Chart(document.getElementById('lowRiskChart'), {
             type: 'doughnut',
+            plugins: [centerTextPlugin],
             data: {
                 labels: ['Low Risk', 'Other'],
                 datasets: [{
@@ -684,6 +752,7 @@
 
         new Chart(document.getElementById('mediumRiskChart'), {
             type: 'doughnut',
+            plugins: [centerTextPlugin],
             data: {
                 labels: ['Medium Risk', 'Other'],
                 datasets: [{
@@ -700,6 +769,7 @@
 
         new Chart(document.getElementById('highRiskChart'), {
             type: 'doughnut',
+            plugins: [centerTextPlugin],
             data: {
                 labels: ['High Risk', 'Other'],
                 datasets: [{
