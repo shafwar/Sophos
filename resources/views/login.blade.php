@@ -27,12 +27,12 @@
         }
 
         .navbar {
-            background: linear-gradient(135deg, #003B7B, #0056b3);
+            background: #3845d5;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            padding: 1rem 2rem;
+            padding: 0.8rem 2rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
