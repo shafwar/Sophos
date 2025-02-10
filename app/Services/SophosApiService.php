@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 class SophosApiService
 {
@@ -23,7 +24,7 @@ class SophosApiService
         $this->clientSecret = config('sophos.client_secret');
         $this->baseUrl = 'https://api.central.sophos.com';
         $this->apiHost = config('sophos.api_host', 'api-us01.central.sophos.com');
-        
+
         // Get cached credentials if available
         $this->accessToken = Cache::get('sophos_access_token');
         $this->tenantId = Cache::get('sophos_tenant_id');
@@ -38,7 +39,7 @@ class SophosApiService
             }
 
             Log::info('Starting authentication process');
-            
+
             $response = Http::timeout(10)->withBasicAuth($this->clientId, $this->clientSecret)
                 ->asForm()
                 ->post('https://id.sophos.com/api/v2/oauth2/token', [
@@ -50,7 +51,7 @@ class SophosApiService
 
             if ($response->successful()) {
                 $this->accessToken = $response->json('access_token');
-                
+
                 // Get whoami information
                 $whoamiResponse = Http::timeout(10)
                     ->withToken($this->accessToken)
@@ -59,11 +60,11 @@ class SophosApiService
 
                 if ($whoamiResponse->successful()) {
                     $this->tenantId = $whoamiResponse->json('id');
-                    
+
                     // Cache the credentials
                     Cache::put('sophos_access_token', $this->accessToken, now()->addMinutes(55));
                     Cache::put('sophos_tenant_id', $this->tenantId, now()->addMinutes(55));
-                    
+
                     return true;
                 }
             }
@@ -79,7 +80,7 @@ class SophosApiService
     private function makeApiRequest($endpoint, $method = 'GET', $params = [])
     {
         $retries = 0;
-        
+
         do {
             try {
                 if (!$this->authenticate()) {
@@ -87,7 +88,7 @@ class SophosApiService
                 }
 
                 $url = "https://{$this->apiHost}{$endpoint}";
-                
+
                 $request = Http::timeout(30)
                     ->withToken($this->accessToken)
                     ->withHeaders([
@@ -95,7 +96,7 @@ class SophosApiService
                         'Accept' => 'application/json'
                     ]);
 
-                $response = $method === 'GET' 
+                $response = $method === 'GET'
                     ? $request->get($url, $params)
                     : $request->post($url, $params);
 
@@ -115,7 +116,7 @@ class SophosApiService
                     'status' => $response->status(),
                     'response' => $response->json()
                 ]);
-                
+
                 return null;
 
             } catch (\Exception $e) {
@@ -133,7 +134,7 @@ class SophosApiService
     public function getAllAlerts()
     {
         $cacheKey = 'sophos_all_alerts';
-        
+
         try {
             // Try to get from cache first
             if ($cachedAlerts = Cache::get($cacheKey)) {
@@ -155,17 +156,17 @@ class SophosApiService
             foreach ($endpoints as $endpoint) {
                 Log::info("Fetching alerts from endpoint: {$endpoint}");
                 $response = $this->makeApiRequest($endpoint);
-                
+
                 if ($response && isset($response['items'])) {
                     $items = $response['items'];
-                    
+
                     // Transform SIEM events if necessary
                     if ($endpoint === '/siem/v1/events') {
                         $items = array_map(function ($event) {
                             return $this->transformSiemEvent($event);
                         }, $items);
                     }
-                    
+
                     $allAlerts = array_merge($allAlerts, $items);
                 }
             }
@@ -187,7 +188,7 @@ class SophosApiService
     private function transformSiemEvent($event)
     {
         $description = [];
-        
+
         if (!empty($event['name'])) {
             $description[] = $event['name'];
         }
@@ -226,7 +227,7 @@ class SophosApiService
     {
         try {
             $alerts = $this->getAllAlerts();
-            
+
             if (!$alerts) {
                 return [
                     'total' => 0,
@@ -301,7 +302,7 @@ class SophosApiService
                 $currentCount = $currentWeek->filter(function ($alert) use ($severity) {
                     return strtolower($alert['severity'] ?? '') === $severity;
                 })->count();
-                
+
                 $previousCount = $previousWeek->filter(function ($alert) use ($severity) {
                     return strtolower($alert['severity'] ?? '') === $severity;
                 })->count();
@@ -324,7 +325,7 @@ class SophosApiService
     {
         try {
             $alerts = $this->getAllAlerts();
-            
+
             if (!$alerts) {
                 return null;
             }
@@ -340,6 +341,173 @@ class SophosApiService
         } catch (\Exception $e) {
             Log::error('Error getting alerts by category:', ['message' => $e->getMessage()]);
             return null;
+        }
+    }
+
+    public function getUsers()
+    {
+        try {
+            // Get endpoints data using makeApiRequest
+            $response = $this->makeApiRequest('/endpoint/v1/endpoints');
+
+            if (!$response || !isset($response['items'])) {
+                Log::error('Failed to get endpoints data or invalid response format');
+                return null;
+            }
+
+            $users = [];
+            $stats = [
+                'all' => 0,
+                'active' => 0,
+                'inactive_2weeks' => 0,
+                'inactive_2months' => 0,
+                'no_devices' => 0
+            ];
+
+            foreach ($response['items'] as $endpoint) {
+                $lastSeen = $endpoint['lastSeenAt'] ?? null;
+                $status = $this->calculateUserStatus($lastSeen);
+
+                $user = [
+                    'name' => $endpoint['hostname'] ?? 'Unknown',
+                    'email' => $endpoint['associatedPerson']['viaLogin'] ?? 'N/A',
+                    'last_online' => $lastSeen ? date('Y-m-d H:i:s', strtotime($lastSeen)) : 'Never',
+                    'devices' => $endpoint['id'] ?? '',
+                    'logins' => $endpoint['associatedPerson']['name'] ?? 'N/A',
+                    'groups' => $endpoint['group'] ?? 'N/A',
+                    'health_status' => $endpoint['health']['overall'] ?? 'unknown'
+                ];
+
+                $users[] = $user;
+
+                // Update statistics
+                $stats['all']++;
+                switch ($status) {
+                    case 'active':
+                        $stats['active']++;
+                        break;
+                    case 'inactive_2weeks':
+                        $stats['inactive_2weeks']++;
+                        break;
+                    case 'inactive_2months':
+                        $stats['inactive_2months']++;
+                        break;
+                }
+            }
+
+            // Calculate no_devices
+            $stats['no_devices'] = count($users) === 0 ? $stats['all'] : 0;
+
+            return [
+                'users_list' => $users,
+                'all' => $stats['all'],
+                'active' => $stats['active'],
+                'inactive_2weeks' => $stats['inactive_2weeks'],
+                'inactive_2months' => $stats['inactive_2months'],
+                'no_devices' => $stats['no_devices']
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error getting users from Sophos API:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return null;
+        }
+    }
+
+    private function calculateUserStatus($lastSeen)
+    {
+        if (!$lastSeen) {
+            return 'inactive_2months';
+        }
+
+        $lastSeenDate = strtotime($lastSeen);
+        $twoWeeksAgo = strtotime('-2 weeks');
+        $twoMonthsAgo = strtotime('-2 months');
+
+        if ($lastSeenDate > $twoWeeksAgo) {
+            return 'active';
+        } elseif ($lastSeenDate > $twoMonthsAgo) {
+            return 'inactive_2weeks';
+        } else {
+            return 'inactive_2months';
+        }
+    }
+
+    public function getComputers()
+    {
+        try {
+        // Ambil data dari API Sophos
+        $response = Http::withHeaders([
+            'X-API-KEY' => config('sophos.api_key'),
+            // Tambahkan header lain yang diperlukan
+        ])->get(config('sophos.api_url') . '/endpoints/computers');
+
+        if ($response->successful()) {
+            $data = $response->json();
+
+            // Transform response sesuai kebutuhan
+            return [
+                'computers_list' => collect($data['items'] ?? [])->map(function ($computer) {
+                    return [
+                        'name' => $computer['hostname'] ?? 'Unknown',
+                        'online' => $this->formatLastSeen($computer['lastSeenAt'] ?? null),
+                        'last_user' => $computer['lastUser'] ?? 'N/A',
+                        'real_time_scan' => $computer['realTimeScan'] ?? 'No',
+                        'last_update' => $this->formatLastSeen($computer['lastUpdateTime'] ?? null),
+                        'last_scan' => $this->formatLastSeen($computer['lastScanTime'] ?? null),
+                        'health_status' => $computer['health']['overall'] ?? 'unknown',
+                        'group' => $computer['group'] ?? 'N/A',
+                        'agent_installed' => $computer['sophos']['isInstalled'] ? 'Yes' : 'No'
+                    ];
+                })->all(),
+                'stats' => [
+                    'all' => 640, // Sesuaikan dengan perhitungan aktual
+                    'active' => 599,
+                    'inactive_2weeks' => 37,
+                    'inactive_2months' => 0,
+                    'not_protected' => 4
+                ]
+            ];
+        }
+
+        Log::error('Failed to get computers from Sophos API', [
+            'status' => $response->status(),
+            'response' => $response->json()
+        ]);
+
+        return null;
+
+        } catch (\Exception $e) {
+        Log::error('Error getting computers from Sophos API:', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return null;
+        }
+    }
+
+    private function formatLastSeen($timestamp)
+    {
+        if (!$timestamp) return 'Never';
+
+        try {
+        $date = Carbon::parse($timestamp);
+        $now = Carbon::now();
+
+        if ($date->diffInMinutes($now) < 60) {
+            return $date->diffInMinutes($now) . ' minutes ago';
+        } elseif ($date->diffInHours($now) < 24) {
+            return $date->diffInHours($now) . ' hours ago';
+        } elseif ($date->diffInDays($now) < 7) {
+            return $date->diffInDays($now) . ' days ago';
+        } else {
+            return $date->format('Y-m-d H:i:s');
+        }
+        } catch (\Exception $e) {
+        return 'Never';
         }
     }
 }

@@ -34,7 +34,7 @@
 
         /* Navbar Styles */
         .navbar {
-            background-color: #3845d5;
+            background-color: #1b258f;
             padding: 0.8rem 2rem;
             transition: all 0.3s ease;
         }
@@ -424,16 +424,16 @@
             .metric-card {
                 margin-bottom: 1rem;
             }
-            
+
             .detail-row {
                 flex-direction: column;
             }
-            
+
             .detail-label {
                 min-width: 100%;
                 margin-bottom: 0.25rem;
             }
-            
+
             .modal-dialog.modal-lg {
                 max-width: 95%;
                 margin: 0.5rem auto;
@@ -468,8 +468,8 @@
                             <span>Dashboards</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Overview</a></li>
-                            <li><a class="dropdown-item" href="#">Analytics</a></li>
+                            <li><a class="dropdown-item" href="{{ route('overview')}}">Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ route('analytics')}}">Analytics</a></li>
                         </ul>
                     </li>
 
@@ -493,7 +493,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#">Current Threats</a></li>
-                            <li><a class="dropdown-item" href="#">Reports</a></li>
+                            <li><a class="dropdown-item" href="{{ route('reports')}}">Reports</a></li>
                         </ul>
                     </li>
 
@@ -662,7 +662,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Event Details Modal -->
     <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -717,7 +717,7 @@
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.style.animationDelay = `${index * 0.1}s`;
-                
+
                 let severityClass;
                 switch(item.severity?.toLowerCase()) {
                     case 'high':
@@ -848,15 +848,15 @@ function showEventDetails(item) {
             afterDraw: (chart, args, options) => {
                 const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
                 ctx.save();
-                
+
                 // Get the text value (first value in dataset)
                 const value = chart.data.datasets[0].data[0];
-                
+
                 // Text styling
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.font = 'bold 24px Poppins';
-                
+
                 // Choose color based on chart ID
                 if (chart.canvas.id === 'lowRiskChart') {
                     ctx.fillStyle = 'rgba(40, 167, 69, 0.8)';  // Green
@@ -865,7 +865,7 @@ function showEventDetails(item) {
                 } else {
                     ctx.fillStyle = 'rgba(220, 53, 69, 0.8)';  // Red
                 }
-                
+
                 // Draw text in center
                 ctx.fillText(value, left + width / 2, top + height / 2);
                 ctx.restore();
