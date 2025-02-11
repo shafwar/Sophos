@@ -9,10 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 
     <style>
         /* Root Variables */
@@ -34,30 +31,31 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--accent-color);
-            margin-top: 80px;
+            margin-top: 60px;
         }
 
-        /* Navbar Styles */
+        /* Updated Navbar Styles */
         .navbar {
-            background-color: #1b258f;
-            padding: 0.8rem 2rem;
-            transition: all 0.3s ease;
+            background-color: #1b258f !important;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
         }
 
         .navbar-brand {
-            color: white;
+            color: white !important;
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 0.5rem 0;
         }
 
         .navbar-brand i {
-            font-size: 1.4rem;
-        }
-
-        .navbar-brand:hover {
-            color: #fff;
+            font-size: 1.2rem;
         }
 
         .navbar-nav {
@@ -66,62 +64,67 @@
             align-items: center;
         }
 
+        .navbar-nav .nav-item {
+            position: relative;
+        }
+
         .navbar-nav .nav-link {
             color: rgba(255, 255, 255, 0.9) !important;
-            padding: 0.8rem 1.2rem;
+            padding: 0.8rem 1rem !important;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            position: relative;
-            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
         .navbar-nav .nav-link i {
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .navbar-nav .nav-link:hover {
             color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .navbar-nav .nav-link:hover::after {
-            width: 80%;
+        /* Dropdown Styles */
+        .dropdown-menu {
+            background-color: white;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            margin-top: 0;
         }
 
-        .navbar-nav .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background-color: #4fc3f7;
-            transition: all 0.3s ease;
-            transform: translateX(-50%);
+        .dropdown-item {
+            padding: 0.5rem 1.5rem;
+            color: #333;
+            font-size: 0.9rem;
         }
 
-        /* New Styles for Dashboard */
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            color: #1b258f;
+        }
+
+        /* Make sure dropdowns work on hover */
+        .nav-item.dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Hide navbar toggler */
+        .navbar-toggler {
+            display: none;
+        }
+
+        .navbar-collapse {
+            display: flex !important;
+        }
+
+        /* Dashboard Styles */
         .dashboard-container {
             padding: 20px;
-        }
-
-        .dashboard-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .dashboard-title {
-            font-size: 24px;
-            color: var(--primary-blue);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-top: 20px;
         }
 
         .card {
@@ -129,12 +132,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             margin-bottom: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
@@ -149,10 +146,11 @@
         .card-title {
             color: var(--primary-blue);
             margin: 0;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 500;
         }
 
+        /* Threat Table Styles */
         .threat-table {
             width: 100%;
             border-collapse: collapse;
@@ -189,10 +187,10 @@
             color: #059669;
         }
 
+        /* Chart Styles */
         .chart-container {
             position: relative;
-            width: 400px;
-            height: 400px;
+            height: 300px;
             margin: 0 auto;
         }
 
@@ -201,26 +199,24 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 10;
             text-align: center;
         }
 
         .chart-value {
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--text-dark);
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
         }
 
+        /* Metrics List Styles */
         .metrics-list {
-            margin-top: 2rem;
-            padding: 0 2rem;
+            padding: 0 20px;
         }
 
         .metric-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 1rem 0;
+            padding: 10px 0;
             border-bottom: 1px solid #eee;
         }
 
@@ -229,21 +225,46 @@
         }
 
         .metric-label {
-            color: var(--text-light);
+            color: #666;
         }
 
         .metric-value {
             font-weight: 500;
         }
 
-        .metric-value.danger {
-            color: #dc2626;
+        /* Web Control Stats */
+        .web-control-stats {
+            padding: 20px;
         }
 
+        .web-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .web-stat-box {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .web-stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1b258f;
+            margin-bottom: 8px;
+        }
+
+        .web-stat-label {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .chart-container {
-                width: 300px;
-                height: 300px;
+            .web-stats-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -257,9 +278,6 @@
                 <i class="fas fa-shield-alt"></i>
                 <span>Pertamina Sophos</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
@@ -302,11 +320,6 @@
                         <a class="nav-link" href="#">
                             <i class="fas fa-file-alt"></i>
                             <span>Reports</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-cog"></i>
                         </a>
                     </li>
                 </ul>
@@ -362,8 +375,9 @@
             </div>
         </div>
 
-        <!-- Devices Summary -->
+        <!-- Summary and Web Control Row -->
         <div class="row">
+            <!-- Device Summary -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
@@ -388,7 +402,7 @@
                             </div>
                             <div class="metric-row">
                                 <span class="metric-label">Not Protected</span>
-                                <span class="metric-value danger">4</span>
+                                <span class="metric-value text-danger">4</span>
                             </div>
                         </div>
                     </div>
@@ -398,9 +412,12 @@
             <!-- Web Control -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-globe text-primary"></i>
-                        <h2 class="card-title">Web control</h2>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-globe text-primary me-2"></i>
+                            <h2 class="card-title">Web control</h2>
+                        </div>
+                        <a href="#" class="text-primary text-decoration-none">See Reports</a>
                     </div>
                     <div class="card-body">
                         <div class="web-stats-grid">
@@ -413,13 +430,18 @@
                                 <div class="web-stat-label">Policy Violations Blocked</div>
                             </div>
                             <div class="web-stat-box">
+
                                 <div class="web-stat-value">41294</div>
+
                                 <div class="web-stat-label">Policy Warnings Issued</div>
                             </div>
                             <div class="web-stat-box">
                                 <div class="web-stat-value">41230</div>
                                 <div class="web-stat-label">Policy Warnings Proceeded</div>
                             </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <small class="text-muted">last 30 days</small>
                         </div>
                     </div>
                 </div>
@@ -453,8 +475,26 @@
                     }
                 },
                 responsive: true,
-                maintainAspectRatio: true
+                maintainAspectRatio: false
             }
+        });
+
+        // Initialize dropdowns
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable Bootstrap dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl)
+            });
+
+            // Add dropdown toggle functionality
+            document.querySelectorAll('.nav-link').forEach(function(element) {
+                if (element.hasAttribute('data-bs-toggle')) {
+                    element.addEventListener('click', function(e) {
+                        e.preventDefault();
+                    });
+                }
+            });
         });
     </script>
 </body>
