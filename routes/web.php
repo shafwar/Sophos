@@ -20,15 +20,12 @@ Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEm
 Route::get('password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
 Route::post('password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 
-// Rute untuk Halaman Dashboard (akses hanya setelah login)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); // Menggunakan controller DashboardController
-});
-
-
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/alerts/{category}', [DashboardController::class, 'getAlertsByCategory']);
     Route::get('/metrics', [DashboardController::class, 'getMetrics']);
-    
+    Route::get('/overview', [DashboardController::class, 'overview'])->name('overview');
+    Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
+    Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
+
 });
