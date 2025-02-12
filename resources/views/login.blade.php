@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PeSo (Pertamina Sophos)</title>
+    <title>Login - PeSo (Sophos)</title>
 
-    <!-- Add Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Reset and Basic Styling */
         * {
             margin: 0;
             padding: 0;
@@ -18,255 +16,327 @@
         }
 
         body {
-            background: linear-gradient(135deg, rgba(0, 59, 123, 0.1), rgba(0, 86, 179, 0.1)), #f0f2f5;
+            background: #1a1f35;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-top: 50px;
+            padding: 90px 20px 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .navbar {
-            background: #3845d5;
+        .bg-animation {
             position: fixed;
-            width: 100%;
             top: 0;
-            z-index: 1000;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar .nav-brand img {
-            height: 40px;
-        }
-
-        /* Login Form Styles */
-        .login-container {
-            background: #ffffff;
-            padding: 3rem 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            left: 0;
             width: 100%;
-            max-width: 400px;
-            animation: fadeIn 1s ease-out;
-            transform: translateY(20px);
-            opacity: 0;
-            animation-fill-mode: forwards;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
 
-        .login-container .welcome-text {
+        .bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%,
+                rgba(41, 66, 112, 0.1),
+                rgba(28, 45, 76, 0.2));
+            animation: pulseGradient 8s ease infinite;
+        }
+
+        @keyframes pulseGradient {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .orbs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.4;
+            animation: orbFloat 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            top: 20%;
+            left: 20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at center,
+                rgba(64, 104, 224, 0.3),
+                rgba(39, 72, 165, 0.1));
+            animation-delay: -2s;
+        }
+
+        .orb-2 {
+            top: 60%;
+            right: 20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle at center,
+                rgba(59, 82, 177, 0.3),
+                rgba(28, 45, 76, 0.1));
+            animation-delay: -4s;
+        }
+
+        .orb-3 {
+            bottom: 10%;
+            left: 30%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle at center,
+                rgba(76, 116, 224, 0.3),
+                rgba(45, 76, 165, 0.1));
+            animation-delay: -6s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.4;
+            }
+            25% {
+                transform: translate(5%, 5%) scale(1.1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(0, 10%) scale(0.9);
+                opacity: 0.3;
+            }
+            75% {
+                transform: translate(-5%, 5%) scale(1.05);
+                opacity: 0.4;
+            }
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #ffffff15, transparent),
+                radial-gradient(2px 2px at 40px 70px, #ffffff10, transparent),
+                radial-gradient(2px 2px at 50px 160px, #ffffff15, transparent),
+                radial-gradient(2px 2px at 90px 40px, #ffffff10, transparent),
+                radial-gradient(2px 2px at 130px 80px, #ffffff15, transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: starFloat 100s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes starFloat {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-200px);
+            }
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow:
+                0 4px 24px -1px rgba(0, 0, 0, 0.2),
+                0 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+            width: 110%;
+            max-width: 500px;
+            position: relative;
+            overflow: hidden;
+            animation: containerFloat 6s ease-in-out infinite;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(125deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.05) 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 70%,
+                transparent 100%);
+            animation: shine 7s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) rotate(25deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(25deg);
+            }
+        }
+
+        @keyframes containerFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.01);
+            }
+        }
+
+        .welcome-text {
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
         }
 
         .welcome-text h2 {
-            color: #003B7B;
-            margin-bottom: 0.5rem;
-            font-size: 2rem;
+            color: #ffffff;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+            animation: textFloat 3s ease-in-out infinite;
         }
 
         .welcome-text p {
-            color: #666;
-            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             position: relative;
         }
 
         .form-input {
             width: 100%;
-            padding: 14px 20px;
-            padding-left: 45px;
-            border: 2px solid #e1e1e1;
-            border-radius: 10px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .form-input:focus {
-            border-color: #003B7B;
-            box-shadow: 0 0 5px rgba(0, 59, 123, 0.2);
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #aaa;
-            transition: color 0.3s ease;
-        }
-
-        .form-input:focus + .input-icon {
-            color: #003B7B;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px -1px rgba(0, 0, 0, 0.2);
         }
 
         .login-button {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #003B7B, #0056b3);
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-weight: 600;
+            border-radius: 14px;
+            font-weight: 500;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            transform: scale(0);
+            transition: transform 0.5s ease;
+        }
+
+        .login-button:hover::before {
+            transform: scale(1);
         }
 
         .login-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 59, 123, 0.2);
-        }
-
-        .login-button:active {
-            transform: scale(0.98);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
         }
 
         .forgot-password {
             text-align: right;
-            margin-top: -1rem;
-            margin-bottom: 1.5rem;
+            margin: -1rem 0 2rem;
         }
 
         .forgot-password a {
-            color: #003B7B;
-            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .forgot-password a:hover {
-            color: #0056b3;
+            color: #ffffff;
         }
 
-        .alert {
-            padding: 1rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
-            animation: slideIn 0.5s ease;
-        }
-
-        .alert-danger {
-            background-color: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-        }
-
-        /* Keyframe Animations */
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(30px);
+        @media (max-width: 640px) {
+            .login-container {
+                padding: 2rem;
+                margin: 0 1rem;
             }
 
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideIn {
-            0% {
-                transform: translateY(-20px);
-                opacity: 0;
+            .welcome-text h2 {
+                font-size: 1.8rem;
             }
 
-            100% {
-                transform: translateY(0);
-                opacity: 1;
+            .orb {
+                opacity: 0.2;
             }
         }
-
-        /* Loading Spinner */
-        .loading {
-            display: none;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            justify-content: center;
-            align-items: center;
-            border-radius: 10px;
-        }
-
-        .loading.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #003B7B;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
     </style>
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-content">
-            <div class="nav-brand">
-                <img src="{{ asset('images/pertamina-logo.png') }}" alt="Pertamina Logo">
-            </div>
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+        <div class="stars"></div>
+        <div class="orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
         </div>
-    </nav>
+    </div>
 
-    <!-- Main Container -->
     <div class="main-container">
         <div class="login-container">
-            <!-- Loading Overlay -->
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-            </div>
-
             <div class="welcome-text">
                 <h2>PERTAMINA SOPHOS</h2>
                 <p>Silahkan login terlebih dahulu</p>
             </div>
 
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul style="margin: 0; padding-left: 1rem;">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
             <form method="POST" action="{{ route('login.submit') }}" id="loginForm">
                 @csrf
                 <div class="form-group">
                     <input type="email" name="email" class="form-input" placeholder="Email" value="{{ old('email') }}" required>
-                    <i class="fas fa-envelope input-icon"></i>
                 </div>
 
                 <div class="form-group">
                     <input type="password" name="password" class="form-input" placeholder="Password" required>
-                    <i class="fas fa-lock input-icon"></i>
                 </div>
 
                 <div class="forgot-password">
@@ -281,21 +351,16 @@
     </div>
 
     <script>
-        // Add loading animation when form is submitted
-        document.getElementById('loginForm').addEventListener('submit', function() {
-            document.getElementById('loading').classList.add('active');
-        });
-
-        // Add subtle animation to input fields when focused
         document.querySelectorAll('.form-input').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.style.transform = 'translateX(5px)';
-                setTimeout(() => {
-                    this.parentElement.style.transform = 'translateX(0)';
-                }, 150);
-            });
+            input.style.opacity = '0';
+            input.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                input.style.transition = 'all 0.5s ease';
+                input.style.opacity = '1';
+                input.style.transform = 'translateY(0)';
+            }, 200);
         });
     </script>
 </body>
-
 </html>
