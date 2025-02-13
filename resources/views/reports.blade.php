@@ -52,28 +52,31 @@
         from { opacity: 0; }
         to { opacity: 1; }
     }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 </style>
 @endpush
 
 @section('content')
 <!-- Header/Breadcrumb -->
-<div class="bg-white border-bottom mb-4" data-aos="fade-down">
-    <div class="container-fluid px-4 py-3">
-        <div class="d-flex justify-content-between align-items-center">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="#" class="text-primary">Overview</a></li>
-                    <li class="breadcrumb-item"><a href="#" class="text-primary">Endpoint Protection Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="#" class="text-primary">Reports</a></li>
-                    <li class="breadcrumb-item active">Computer Report</li>
-                </ol>
-            </nav>
-            <div>
-                <img src="{{ asset('images/pertamina-gas.png') }}" alt="PERTAMINA GAS" height="40">
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="container-fluid px-4">
     <!-- Search & Filters -->

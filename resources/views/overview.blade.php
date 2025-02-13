@@ -1,126 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - PeSo (Pertamina Sophos)</title>
-    <!-- CSS and Script imports -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        /* Root Variables */
-        :root {
-            --primary-color: #003B7B;
-            --secondary-color: #00BFFF;
-            --accent-color: #f4f7fc;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --primary-blue: #1b258f;
-            --secondary-blue: #4fc3f7;
-            --text-dark: #333;
-            --text-light: #666;
-            --bg-light: #f8f9fa;
-        }
-
-        /* Base Styles */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--accent-color);
-            margin-top: 60px;
-        }
-
-        /* Updated Navbar Styles */
-        .navbar {
-            background-color: #1b258f !important;
-            padding: 0.5rem 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .navbar-brand {
-            color: white !important;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
-        }
-
-        .navbar-brand i {
-            font-size: 1.2rem;
-        }
-
-        .navbar-nav {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-        }
-
-        .navbar-nav .nav-item {
-            position: relative;
-        }
-
-        .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            padding: 0.8rem 1rem !important;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .navbar-nav .nav-link i {
-            font-size: 1rem;
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: white !important;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Dropdown Styles */
-        .dropdown-menu {
-            background-color: white;
-            border: none;
-            border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            margin-top: 0;
-        }
-
-        .dropdown-item {
-            padding: 0.5rem 1.5rem;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
-            color: #1b258f;
-        }
-
-        /* Make sure dropdowns work on hover */
-        .nav-item.dropdown:hover .dropdown-menu {
-            display: block;
-        }
-
-        /* Hide navbar toggler */
-        .navbar-toggler {
-            display: none;
-        }
-
-        .navbar-collapse {
-            display: flex !important;
-        }
-
+@push('styles')
+<style>
         /* Dashboard Styles */
         .dashboard-container {
             padding: 20px;
@@ -267,66 +148,30 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
+    @endpush
 </head>
 
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-shield-alt"></i>
-                <span>Pertamina Sophos</span>
-            </a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-chart-line"></i>
-                            <span>Dashboards</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('overview')}}">Overview</a></li>
-                            <li><a class="dropdown-item" href="{{ route('analytics')}}">Analytics</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-box"></i>
-                            <span>My Products</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Active Products</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-shield-virus"></i>
-                            <span>Threat Analysis</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Current Threats</a></li>
-                            <li><a class="dropdown-item" href="#">Reports</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-bell"></i>
-                            <span>Alerts</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Reports</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
+@section('content')
     <!-- Dashboard Content -->
     <div class="dashboard-container">
         <!-- Recent Threats Card -->
@@ -449,9 +294,9 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    @push('scripts')
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Initialize device chart
         const ctx = document.getElementById('deviceChart').getContext('2d');
         new Chart(ctx, {
@@ -478,6 +323,7 @@
                 maintainAspectRatio: false
             }
         });
+    }
 
         // Initialize dropdowns
         document.addEventListener('DOMContentLoaded', function() {
@@ -497,6 +343,5 @@
             });
         });
     </script>
-</body>
-
-</html>
+@endpush
+@endsection

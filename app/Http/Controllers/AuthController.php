@@ -1,8 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\User; // Tambahkan import ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // Tambahkan import ini
 
 class AuthController extends Controller
 {
@@ -56,5 +58,44 @@ class AuthController extends Controller
 
         // Redirect ke halaman login setelah logout
         return redirect()->route('login');
+    }
+
+        // Menampilkan halaman register
+    public function showRegisterForm()
+    {
+        // Jika pengguna sudah login, arahkan ke dashboard
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('register');
+    }
+
+    // Proses registrasi
+    public function register(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        // Buat user baru
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        // Login user yang baru dibuat
+        Auth::login($user);
+
+        // Regenerasi sesi untuk keamanan
+        $request->session()->regenerate();
+
+        // Redirect ke dashboard
+        return redirect()->route('dashboard')
+            ->with('success', 'Registration successful! Welcome to Pertagas Sophos.');
     }
 }

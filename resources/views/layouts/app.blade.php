@@ -97,6 +97,71 @@
             transition: all 0.3s ease;
             transform: translateX(-50%);
         }
+
+        /* Tambahkan di bagian style app.blade.php */
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeInDown 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .dropdown-item.text-danger {
+            color: var(--danger-color) !important;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .dropdown-menu-end {
+            right: 0;
+            left: auto;
+        }
+
+        .dropdown-item button {
+            background: none;
+            border: none;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Animation */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 
     @stack('styles')
