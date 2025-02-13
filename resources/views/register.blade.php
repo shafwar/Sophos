@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PeSo (Sophos)</title>
+    <title>Register - PeSo (Sophos)</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Gunakan style yang sama dengan login.blade.php */
+        /* ... style dari login.blade.php ... */
         * {
             margin: 0;
             padding: 0;
@@ -307,6 +309,18 @@
             .orb {
                 opacity: 0.2;
             }
+        }   
+        /* Tambahan style untuk form register */
+        .error-message {
+            color: #ff4444;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .success-message {
+            color: #00C851;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -326,35 +340,72 @@
         <div class="login-container">
             <div class="welcome-text">
                 <h2>PERTAGAS SOPHOS</h2>
-                <p>Silahkan login terlebih dahulu</p>
+                <p>Buat akun baru</p>
             </div>
-        
-            <form method="POST" action="{{ route('login.submit') }}" id="loginForm">
+
+            <form method="POST" action="{{ route('register') }}" id="registerForm">
                 @csrf
+                
                 <div class="form-group">
-                    <input type="email" name="email" class="form-input" placeholder="Email" value="{{ old('email') }}" required>
+                    <input type="text" 
+                           name="name" 
+                           class="form-input @error('name') is-invalid @enderror" 
+                           placeholder="Full Name" 
+                           value="{{ old('name') }}" 
+                           required>
+                    @error('name')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
                 </div>
-        
+
                 <div class="form-group">
-                    <input type="password" name="password" class="form-input" placeholder="Password" required>
+                    <input type="email" 
+                           name="email" 
+                           class="form-input @error('email') is-invalid @enderror" 
+                           placeholder="Email" 
+                           value="{{ old('email') }}" 
+                           required>
+                    @error('email')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
                 </div>
-        
-                <div class="forgot-password">
-                    <a href="{{ route('password.request') }}">Lupa Password?</a>
+
+                <div class="form-group">
+                    <input type="password" 
+                           name="password" 
+                           class="form-input @error('password') is-invalid @enderror" 
+                           placeholder="Password" 
+                           required>
+                    @error('password')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
                 </div>
-        
+
+                <div class="form-group">
+                    <input type="password" 
+                           name="password_confirmation" 
+                           class="form-input" 
+                           placeholder="Confirm Password" 
+                           required>
+                </div>
+
                 <button type="submit" class="login-button">
-                    LOGIN
+                    REGISTER
                 </button>
-        
-                <div class="text-center mt-4">
+
+                <div class="text-center" style="margin-top: 2rem;">
                     <p style="color: rgba(255, 255, 255, 0.7);">
-                        Belum punya akun? 
-                        <a href="{{ route('register') }}" style="color: #3b82f6; text-decoration: none;">Register</a>
+                        Sudah punya akun? 
+                        <a href="{{ route('login') }}" 
+                           style="color: #3b82f6; text-decoration: none; 
+                                  transition: all 0.3s ease;">
+                            Login disini
+                        </a>
                     </p>
                 </div>
             </form>
         </div>
+    </div>
 
     <script>
         document.querySelectorAll('.form-input').forEach(input => {

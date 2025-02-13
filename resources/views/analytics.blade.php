@@ -1,25 +1,5 @@
 @extends('layouts.app')
 @section('content')
-<div class="container-fluid py-3">
-    <!-- Header/Breadcrumb -->
-    <div class="bg-white border-bottom mb-4">
-        <div class="container-fluid px-4 py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Overview</a></li>
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Endpoint Protection Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="#" class="text-primary">Reports</a></li>
-                        <li class="breadcrumb-item active">User Report</li>
-                    </ol>
-                </nav>
-                <div>
-                    <img src="{{ asset('images/pertamina-gas.png') }}" alt="PERTAMINA GAS" height="40">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Search & Filters -->
     <div class="container-fluid px-4">
         <div class="row g-3 mb-4 align-items-center">
