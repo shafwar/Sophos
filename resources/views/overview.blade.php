@@ -1,347 +1,225 @@
 @extends('layouts.app')
 
-@push('styles')
-<style>
-        /* Dashboard Styles */
-        .dashboard-container {
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            background: white;
-            border-bottom: 1px solid #eee;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-title {
-            color: var(--primary-blue);
-            margin: 0;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        /* Threat Table Styles */
-        .threat-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .threat-table th {
-            background: var(--bg-light);
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .threat-table td {
-            padding: 12px 16px;
-            border-top: 1px solid #eee;
-            color: var(--text-light);
-        }
-
-        .priority-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .priority-high {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .priority-low {
-            background: #ecfdf5;
-            color: #059669;
-        }
-
-        /* Chart Styles */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 0 auto;
-        }
-
-        .chart-center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-
-        .chart-value {
-            font-size: 32px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        /* Metrics List Styles */
-        .metrics-list {
-            padding: 0 20px;
-        }
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .metric-row:last-child {
-            border-bottom: none;
-        }
-
-        .metric-label {
-            color: #666;
-        }
-
-        .metric-value {
-            font-weight: 500;
-        }
-
-        /* Web Control Stats */
-        .web-control-stats {
-            padding: 20px;
-        }
-
-        .web-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .web-stat-box {
-            padding: 20px;
-            text-align: center;
-        }
-
-        .web-stat-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: #1b258f;
-            margin-bottom: 8px;
-        }
-
-        .web-stat-label {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.3;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .web-stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-    </style>
-    @endpush
-</head>
-
 @section('content')
-    <!-- Dashboard Content -->
-    <div class="dashboard-container">
-        <!-- Recent Threats Card -->
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-exclamation-triangle text-warning"></i>
-                <h2 class="card-title">Recent threat graphs</h2>
+<div class="container-fluid">
+    <!-- Recent threat graphs Section -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <h5 class="card-title mb-0">Recent threat graphs</h5>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="threat-table">
-                        <thead>
-                            <tr>
-                                <th>Time created</th>
-                                <th>Priority</th>
-                                <th>Name</th>
-                                <th>User</th>
-                                <th>Device</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Feb 6, 2025 10:49 AM</td>
-                                <td><span class="priority-badge priority-high">High</span></td>
-                                <td>TrojAgent-TWK</td>
-                                <td>PERTAMINA\nik.sulistiani.ptg</td>
-                                <td>HQ-Notebook-80</td>
-                            </tr>
-                            <tr>
-                                <td>Feb 5, 2025 9:44 AM</td>
-                                <td><span class="priority-badge priority-low">Low</span></td>
-                                <td>Mal/HTMLGen-A</td>
-                                <td>PTG-DESKTOP-252\ms.serpong</td>
-                                <td>PTG-DESKTOP-252</td>
-                            </tr>
-                            <tr>
-                                <td>Feb 5, 2025 8:48 AM</td>
-                                <td><span class="priority-badge priority-low">Low</span></td>
-                                <td>Troj/Lnk-I</td>
-                                <td>PERTAMINA\mk.nofriyanto.s</td>
-                                <td>DESKTOP-040G743</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">Time created</th>
+                            <th class="px-4 py-3">Priority</th>
+                            <th class="px-4 py-3">Name</th>
+                            <th class="px-4 py-3">User</th>
+                            <th class="px-4 py-3">Device</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4">Feb 6, 2025 10:49 AM</td>
+                            <td class="px-4"><span class="badge bg-danger">High</span></td>
+                            <td class="px-4">TrojAgent-TWK</td>
+                            <td class="px-4">PERTAMINA\nik.sulistiani.ptg</td>
+                            <td class="px-4">HQ-Notebook-80</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4">Feb 5, 2025 9:44 AM</td>
+                            <td class="px-4"><span class="badge bg-success">Low</span></td>
+                            <td class="px-4">Mal/HTMLGen-A</td>
+                            <td class="px-4">PTG-DESKTOP-252\ms.serpong</td>
+                            <td class="px-4">PTG-DESKTOP-252</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4">Feb 5, 2025 8:48 AM</td>
+                            <td class="px-4"><span class="badge bg-success">Low</span></td>
+                            <td class="px-4">Troj/Lnk-I</td>
+                            <td class="px-4">PERTAMINA\mk.nofriyanto.s</td>
+                            <td class="px-4">DESKTOP-040G743</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Devices and Users Summary -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-laptop me-2"></i>
+                        <h5 class="card-title mb-0">Devices and users: summary</h5>
+                    </div>
+                    <div class="chart-container position-relative" style="width: 100%; max-width: 300px; margin: 0 auto;">
+                        <canvas id="devicesChart"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <h2 class="display-4 mb-0">640</h2>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted">Active</span>
+                            <span>599</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted">Inactive 2+ Weeks</span>
+                            <span>37</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted">Not Protected</span>
+                            <span>4</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Summary and Web Control Row -->
-        <div class="row">
-            <!-- Device Summary -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-desktop text-primary"></i>
-                        <h2 class="card-title">Devices and users: summary</h2>
+        <!-- Web Control -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="fas fa-globe me-2"></i>
+                        <h5 class="card-title mb-0">Web control</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="chart-container">
-                            <canvas id="deviceChart"></canvas>
-                            <div class="chart-center-text">
-                                <div class="chart-value">640</div>
+                    <div class="row g-5">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h2 class="display-5 fw-semibold mb-3">0</h2>
+                                <p class="text-secondary mb-0">Web Threats Blocked</p>
                             </div>
                         </div>
-                        <div class="metrics-list">
-                            <div class="metric-row">
-                                <span class="metric-label">Active</span>
-                                <span class="metric-value">599</span>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h2 class="display-5 fw-semibold mb-3">718</h2>
+                                <p class="text-secondary mb-0">Policy Violations Blocked</p>
                             </div>
-                            <div class="metric-row">
-                                <span class="metric-label">Inactive 2+ Weeks</span>
-                                <span class="metric-value">37</span>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h2 class="display-5 fw-semibold mb-3">41294</h2>
+                                <p class="text-secondary mb-0">Policy Warnings Issued</p>
                             </div>
-                            <div class="metric-row">
-                                <span class="metric-label">Not Protected</span>
-                                <span class="metric-value text-danger">4</span>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h2 class="display-5 fw-semibold mb-3">41230</h2>
+                                <p class="text-secondary mb-0">Policy Warnings Proceeded</p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Web Control -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-globe text-primary me-2"></i>
-                            <h2 class="card-title">Web control</h2>
-                        </div>
-                        <a href="#" class="text-primary text-decoration-none">See Reports</a>
-                    </div>
-                    <div class="card-body">
-                        <div class="web-stats-grid">
-                            <div class="web-stat-box">
-                                <div class="web-stat-value">0</div>
-                                <div class="web-stat-label">Web Threats Blocked</div>
-                            </div>
-                            <div class="web-stat-box">
-                                <div class="web-stat-value">718</div>
-                                <div class="web-stat-label">Policy Violations Blocked</div>
-                            </div>
-                            <div class="web-stat-box">
-
-                                <div class="web-stat-value">41294</div>
-
-                                <div class="web-stat-label">Policy Warnings Issued</div>
-                            </div>
-                            <div class="web-stat-box">
-                                <div class="web-stat-value">41230</div>
-                                <div class="web-stat-label">Policy Warnings Proceeded</div>
-                            </div>
-                        </div>
-                        <div class="text-end mt-3">
-                            <small class="text-muted">last 30 days</small>
-                        </div>
+                    <div class="text-end mt-4">
+                        <span class="text-secondary small">last 30 days</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize device chart
-        const ctx = document.getElementById('deviceChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [599, 37, 4],
-                    backgroundColor: [
-                        '#4CAF50',  // Active
-                        '#FFC107',  // Inactive
-                        '#F44336'   // Not Protected
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                cutout: '70%',
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-
-        // Initialize dropdowns
-        document.addEventListener('DOMContentLoaded', function() {
-            // Enable Bootstrap dropdowns
-            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
-            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl)
-            });
-
-            // Add dropdown toggle functionality
-            document.querySelectorAll('.nav-link').forEach(function(element) {
-                if (element.hasAttribute('data-bs-toggle')) {
-                    element.addEventListener('click', function(e) {
-                        e.preventDefault();
-                    });
-                }
-            });
-        });
-    </script>
-@endpush
+</div>
 @endsection
+
+@push('styles')
+<style>
+.chart-container {
+    height: 300px;
+    position: relative;
+}
+
+.chart-container h2 {
+    font-size: 2.5rem;
+    font-weight: 500;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+/* Custom styles for Web control numbers */
+.display-5 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.text-secondary {
+    color: #6c757d !important;
+}
+
+/* Improve spacing between elements */
+.g-5 {
+    --bs-gutter-x: 3rem;
+    --bs-gutter-y: 3rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.badge {
+    padding: 0.5em 1em;
+    border-radius: 6px;
+}
+
+.table th {
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.display-6 {
+    font-size: 2rem;
+}
+</style>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Donut Chart Configuration
+    const ctx = document.getElementById('devicesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Active', 'Inactive 2+ Weeks', 'Not Protected'],
+            datasets: [{
+                data: [599, 37, 4],
+                backgroundColor: [
+                    '#4CAF50',  // Active - Green
+                    '#FFC107',  // Inactive - Yellow
+                    '#FF5722'   // Not Protected - Red
+                ],
+                borderWidth: 0,
+                cutout: '80%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true
+            }
+        }
+    });
+});
+</script>
+@endpush
