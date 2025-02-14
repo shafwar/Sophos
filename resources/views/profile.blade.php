@@ -7,20 +7,20 @@
             <div class="card mb-4">
                 <div class="card-body text-center">
                     @if($user->profile_picture)
-                        <img src="{{ Storage::url($user->profile_picture) }}" 
+                        <img src="{{ Storage::url($user->profile_picture) }}"
                             alt="Profile Picture"
-                            class="rounded-circle img-fluid mb-3" 
+                            class="rounded-circle img-fluid mb-3"
                             style="width: 150px; height: 150px; object-fit: cover;">
                     @else
-                        <img src="{{ asset('images/default-avatar.png') }}" 
+                        <img src="{{ asset('images/default-avatar.png') }}"
                             alt="Default Profile"
-                            class="rounded-circle img-fluid mb-3" 
+                            class="rounded-circle img-fluid mb-3"
                             style="width: 150px; height: 150px; object-fit: cover;">
                      @endif
-                    
+
                     <h5 class="mb-1">{{ $user->name }}</h5>
                     <p class="text-muted mb-3">{{ $user->email }}</p>
-                    
+
                     <form action="{{ route('profile.upload-photo') }}" method="POST" enctype="multipart/form-data" class="mb-3">
                         @csrf
                         <div class="d-flex justify-content-center align-items-center gap-2">
@@ -28,7 +28,7 @@
                             <button type="submit" class="btn btn-primary btn-sm">Upload</button>
                         </div>
                     </form>
-                    
+
                     @if($user->profile_picture)
                         <form action="{{ route('profile.delete-photo') }}" method="POST">
                             @csrf
@@ -39,14 +39,14 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-body">
                     <form action="{{ route('profile.update') }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="row mb-3">
                             <div class="col-sm-3">
                                 <label class="form-label">Full Name</label>
