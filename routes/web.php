@@ -34,10 +34,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Traffic Risk Routes
     Route::get('/traffic-risk/weekly', [DashboardController::class, 'getWeeklyTrafficRisk'])->name('traffic.weekly');
-    Route::get('/traffic-risk/details/{week}/{level}', [DashboardController::class, 'getTrafficRiskDetails'])->name('traffic.details');
+    Route::get('/traffic-risk/details/{month}/{level}', [DashboardController::class, 'getTrafficRiskDetails'])->name('traffic.details');
     Route::get('/traffic-risk/event/{id}', [DashboardController::class, 'getTrafficRiskEvent'])->name('traffic.event');
     Route::get('/alerts/low-risk', [DashboardController::class, 'getLowRiskData'])
     ->name('alerts.low-risk');
+    Route::get('/traffic-risk/monthly-details/{month}', [DashboardController::class, 'getMonthlyDetails'])
+    ->name('traffic.monthly-details');
 
     // Main Navigation Routes
     Route::get('/overview', [DashboardController::class, 'overview'])->name('overview');

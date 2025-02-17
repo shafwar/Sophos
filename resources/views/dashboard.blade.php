@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - PeSo (Pertagas Sophos)</title>
-    <!-- CSS and Script imports -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -389,36 +387,6 @@
             }
         }
 
-        .modal .table tbody tr {
-            animation: slideInRight 0.5s ease-in-out;
-            animation-fill-mode: both;
-            transition: all 0.3s ease;
-        }
-
-        .modal .table tbody tr:hover {
-            background-color: rgba(0, 59, 123, 0.05);
-            transform: translateX(5px);
-        }
-
-        .modal.fade .modal-dialog {
-            transition: transform 0.3s ease-out;
-            transform: scale(0.95);
-        }
-
-        .modal.show .modal-dialog {
-            transform: scale(1);
-        }
-
-        /* Close button in modal */
-        .modal .btn-close {
-            opacity: 0.8;
-            filter: brightness(0) invert(1);
-        }
-
-        .modal .btn-close:hover {
-            opacity: 1;
-        }
-
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .metric-card {
@@ -439,26 +407,6 @@
                 margin: 0.5rem auto;
             }
         }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-                    
     </style>
 </head>
 
@@ -640,64 +588,65 @@
 
         <!-- Traffic Overview -->
         <div class="dashboard-card" data-aos="fade-up">
-            <h5><i class="fas fa-chart-area me-2"></i>TRAFFIC OVERVIEW</h5>
+            <h5><i class="fas fa-chart-area me-2"></i>TRAFFIC RISK OVERVIEW</h5>
             <div class="chart-container">
-                <canvas id="trafficChart"></canvas>
+                <canvas id="trafficRiskChart"></canvas>
             </div>
         </div>
 
     </div>
 
-    <!-- Alert Details Modal -->
-    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="detailModalLabel">Detail Information</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Risk Details Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">Risk Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="15%">ID</th>
+                                <th width="15%">Category</th>
+                                <th width="30%">Description</th>
+                                <th width="10%">Severity</th>
+                                <th width="15%">Date</th>
+                                <th width="15%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detailTableBody">
+                            <!-- Data will be dynamically inserted here -->
+                        </tbody>
+                    </table>
                 </div>
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th width="15%">ID</th>
-                                    <th width="15%">Category</th>
-                                    <th width="30%">Description</th>
-                                    <th width="10%">Severity</th>
-                                    <th width="15%">Raised At</th>
-                                    <th width="15%">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody id="detailTableBody">
-                                <!-- Data will be dynamically inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Event Details Modal -->
-    <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Event Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="eventDetailsContent">
-                        <!-- Details will be inserted here -->
-                    </div>
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="eventDetailsContent">
+                    <!-- Details will be inserted here -->
                 </div>
             </div>
         </div>
     </div>
+</div>
+
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1046,6 +995,333 @@ function showEventDetails(item) {
                 }
             }
         });
+
+        // Tambahkan fungsi untuk fetch data traffic risk
+async function fetchTrafficRiskData() {
+    try {
+        const response = await fetch('/traffic-risk/weekly');
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error('Error fetching traffic data:', error);
+        return [];
+    }
+}
+
+// Fungsi untuk menampilkan modal detail
+async function showRiskDetails(month, riskLevel) {
+    try {
+        const response = await fetch(`/traffic-risk/details/${month}/${riskLevel}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        const details = await response.json();
+        
+        // Update konten modal
+        const modalTitle = document.getElementById('detailModalLabel');
+        const modalBody = document.getElementById('detailTableBody');
+        
+        modalTitle.textContent = `${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk Details - ${month}`;
+        
+        modalBody.innerHTML = details.incidents.map(incident => `
+            <tr>
+                <td class="text-muted small">${incident.id || '-'}</td>
+                <td>${incident.category || '-'}</td>
+                <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
+                <td>
+                    <span class="badge ${getBadgeClass(riskLevel)}">
+                        ${riskLevel.toUpperCase()}
+                    </span>
+                </td>
+                <td class="small">${formatDate(incident.date)}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(incident)})">
+                        View Details
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        
+        // Tampilkan modal
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        detailModal.show();
+    } catch (error) {
+        console.error('Error fetching risk details:', error);
+    }
+}
+
+// Fungsi helper untuk badge class
+function getBadgeClass(riskLevel) {
+    switch(riskLevel.toLowerCase()) {
+        case 'high': return 'badge-high bg-danger';
+        case 'medium': return 'badge-medium bg-warning';
+        case 'low': return 'badge-low bg-success';
+        default: return 'badge-secondary bg-secondary';
+    }
+}
+
+// Fungsi untuk format tanggal
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleString();
+}
+
+async function initializeTrafficRiskChart() {
+    try {
+        const ctx = document.getElementById('trafficRiskChart').getContext('2d');
+        
+        // Destroy existing chart if any
+        if (window.trafficChart) {
+            window.trafficChart.destroy();
+        }
+
+        // Fetch data from API
+        const response = await fetch('/traffic-risk/weekly');
+        const jsonData = await response.json();
+        
+        if (!jsonData.success || !jsonData.data) {
+            throw new Error('Invalid data format received');
+        }
+
+        const chartData = jsonData.data;
+
+        window.trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.map(item => item.month),
+                datasets: [
+                    {
+                        label: 'High Risk',
+                        data: chartData.map(item => item.highRisk),
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointStyle: 'circle'
+                    },
+                    {
+                        label: 'Medium Risk',
+                        data: chartData.map(item => item.mediumRisk),
+                        borderColor: '#ffc107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointStyle: 'circle'
+                    },
+                    {
+                        label: 'Low Risk',
+                        data: chartData.map(item => item.lowRisk),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointStyle: 'circle'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                onClick: async (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const month = chartData[index].month;
+                        await showMonthDetails(month);
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing chart:', error);
+    }
+}
+
+// Function to show risk details
+async function showRiskDetails(month, riskLevel) {
+    try {
+        const response = await fetch(`/traffic-risk/details/${month}/${riskLevel}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch details');
+        }
+        const details = await response.json();
+        
+        // Update modal content
+        const modalTitle = document.getElementById('detailModalLabel');
+        const modalBody = document.getElementById('detailTableBody');
+        
+        modalTitle.textContent = `${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk Details - ${month}`;
+        
+        modalBody.innerHTML = details.incidents.map(incident => `
+            <tr>
+                <td class="text-muted small">${incident.id || '-'}</td>
+                <td>${incident.category || '-'}</td>
+                <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
+                <td>
+                    <span class="badge ${getBadgeClass(riskLevel)}">
+                        ${riskLevel.toUpperCase()}
+                    </span>
+                </td>
+                <td class="small">${formatDate(incident.date)}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(incident)})">
+                        View Details
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        
+        // Show modal
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        detailModal.show();
+    } catch (error) {
+        console.error('Error fetching risk details:', error);
+    }
+}
+
+function showEventDetails(item) {
+    const detailsContent = document.getElementById('eventDetailsContent');
+    let detailsHtml = `
+        <div class="event-details">
+            <div class="detail-section">
+                <h6 class="section-title">Event Information</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Event Type:</span>
+                    <span class="detail-value">${item.category || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Severity:</span>
+                    <span class="detail-value">
+                        <span class="badge bg-${item.severity === 'high' ? 'danger' : item.severity === 'medium' ? 'warning' : 'success'}">${item.severity || '-'}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span>
+                    <span class="detail-value">${item.date ? new Date(item.date).toLocaleString() : '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Description:</span>
+                    <span class="detail-value">${item.description || '-'}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h6 class="section-title">Location & Source</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Location:</span>
+                    <span class="detail-value">${item.location || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Source:</span>
+                    <span class="detail-value">${item.source || '-'}</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h6 class="section-title">Endpoint Information</h6>
+                <div class="detail-row">
+                    <span class="detail-label">Endpoint Type:</span>
+                    <span class="detail-value">${item.endpoint_type || '-'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Endpoint ID:</span>
+                    <span class="detail-value">${item.endpoint_id || '-'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+
+    detailsContent.innerHTML = detailsHtml;
+
+    const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+    eventDetailsModal.show();
+}
+
+// Helper function for badge classes
+function getBadgeClass(riskLevel) {
+    switch(riskLevel.toLowerCase()) {
+        case 'high': return 'badge-high bg-danger';
+        case 'medium': return 'badge-medium bg-warning';
+        case 'low': return 'badge-low bg-success';
+        default: return 'badge-secondary bg-secondary';
+    }
+}
+
+// Helper function to format date
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleString();
+}
+
+async function showMonthDetails(month) {
+    try {
+        const response = await fetch(`/traffic-risk/monthly-details/${month}`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        const details = await response.json();
+        
+        const modalTitle = document.getElementById('detailModalLabel');
+        const modalBody = document.getElementById('detailTableBody');
+        
+        modalTitle.textContent = `Alert Details - ${month}`;
+        
+        if (!details.incidents || details.incidents.length === 0) {
+            modalBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">No alerts found for ${month}</td>
+                </tr>
+            `;
+        } else {
+            modalBody.innerHTML = details.incidents.map(incident => `
+                <tr>
+                    <td class="text-muted small">${incident.id || '-'}</td>
+                    <td>${incident.category || '-'}</td>
+                    <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
+                    <td>
+                        <span class="badge ${getBadgeClass(incident.severity)}">
+                            ${incident.severity?.toUpperCase() || '-'}
+                        </span>
+                    </td>
+                    <td class="small">${formatDate(incident.date)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick='showEventDetails(${JSON.stringify(incident)})'>
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        detailModal.show();
+    } catch (error) {
+        console.error('Error fetching month details:', error);
+        alert('Failed to load month details. Please try again.');
+    }
+}
+
+// Initialize when document is ready
+document.addEventListener('DOMContentLoaded', initializeTrafficRiskChart);
+
     </script>
 </body>
 </html>
