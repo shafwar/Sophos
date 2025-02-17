@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
@@ -215,6 +216,117 @@ class DashboardController extends Controller
         }
     }
 
+    public function getWeeklyTrafficRisk()
+{
+    try {
+        $sophosService = app(SophosApiService::class);
+        $alerts = $sophosService->getAllAlerts();
+        
+        Log::info('Alerts received:', ['count' => count($alerts)]);
+        
+        // Group alerts by month and risk level
+        $monthlyData = collect($alerts)->groupBy(function ($alert) {
+            return Carbon::parse($alert['raisedAt'])->format('M');
+        })->map(function ($monthAlerts) {
+            return [
+                'highRisk' => $monthAlerts->where('severity', 'high')->count(),
+                'mediumRisk' => $monthAlerts->where('severity', 'medium')->count(),
+                'lowRisk' => $monthAlerts->where('severity', 'low')->count(),
+            ];
+        });
+
+        
+
+        // Transform into the format needed for the chart
+        $chartData = $monthlyData->map(function ($risks, $month) {
+            return array_merge(['month' => $month], $risks);
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $chartData
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error fetching traffic risk data: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch traffic risk data'
+        ], 500);
+    }
+}
+
+public function getTrafficRiskDetails($month, $level)
+{
+    try {
+        $sophosService = app(SophosApiService::class);
+        $alerts = $sophosService->getAllAlerts();
+        
+        // Filter alerts by month and risk level
+        $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level) {
+            return Carbon::parse($alert['raisedAt'])->format('M') === $month 
+                && strtolower($alert['severity']) === strtolower($level);
+        })->map(function ($alert) {
+            return [
+                'id' => $alert['id'],
+                'category' => $alert['category'],
+                'description' => $alert['description'],
+                'date' => $alert['raisedAt'],
+                'device' => $alert['endpoint_id'] ?? 'Unknown Device',
+                'source' => $alert['source'] ?? 'Unknown Source',
+                'location' => $alert['location'] ?? 'Unknown Location'
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'month' => $month,
+            'riskLevel' => $level,
+            'incidents' => $filteredAlerts
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error fetching traffic risk details: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch risk details'
+        ], 500);
+    }
+}
+
+public function getMonthlyDetails($month)
+{
+    try {
+        $alerts = $this->sophosApi->getAllAlerts();
+        
+        // Filter alerts untuk bulan yang dipilih
+        $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month) {
+            return Carbon::parse($alert['raisedAt'])->format('M') === $month;
+        })->map(function ($alert) {
+            return [
+                'id' => $alert['id'],
+                'category' => $alert['category'],
+                'description' => $alert['description'],
+                'severity' => $alert['severity'],
+                'date' => $alert['raisedAt'],
+                'source' => $alert['source'] ?? null,
+                'location' => $alert['location'] ?? null,
+                'endpoint_type' => $alert['endpoint_type'] ?? null,
+                'endpoint_id' => $alert['endpoint_id'] ?? null
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'month' => $month,
+            'incidents' => $filteredAlerts
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error fetching monthly details: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch monthly details'
+        ], 500);
+    }
+}
     public function overview()
     {
         return view('overview', ['pageTitle' => 'Overview']);
