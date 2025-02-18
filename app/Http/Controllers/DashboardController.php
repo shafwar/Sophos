@@ -173,31 +173,36 @@ class DashboardController extends Controller
     {
         try {
             Log::info('Getting alerts for category: ' . $category);
+            
             $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
                 return $this->sophosApi->getAlertsByCategory($category);
             });
-
-            if ($alerts === null) {
-                Log::error('Failed to get alerts from SophosApiService');
-                return response()->json([
-                    'error' => 'Failed to fetch alerts',
-                    'message' => 'Could not retrieve alerts from Sophos API'
-                ], 500);
-            }
-
-            return response()->json($alerts);
+    
+            // Ensure we always return an array
+            $alerts = is_array($alerts) ? $alerts : [];
+    
+            return response()->json([
+                'success' => true,
+                'data' => $alerts,
+                'category' => $category,
+                'total' => count($alerts)
+            ]);
+    
         } catch (\Exception $e) {
             Log::error('Error in getAlertsByCategory:', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'category' => $category,
+                'message' => $e->getMessage()
             ]);
-
+    
             return response()->json([
-                'error' => 'Server error',
-                'message' => 'An unexpected error occurred'
+                'success' => false,
+                'message' => 'An error occurred while fetching the data.',
+                'data' => [],
+                'category' => $category
             ], 500);
         }
     }
+
 
     public function getMetrics()
     {

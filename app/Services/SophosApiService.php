@@ -324,23 +324,31 @@ class SophosApiService
     public function getAlertsByCategory($category)
     {
         try {
-            $alerts = $this->getAllAlerts();
-
-            if (!$alerts) {
-                return null;
+            $allAlerts = $this->getAllAlerts();
+            
+            if (!is_array($allAlerts)) {
+                return []; // Return empty array instead of null
             }
-
-            // Filter alerts based on category/severity
-            return collect($alerts)->filter(function ($alert) use ($category) {
-                if (strtolower($category) === 'all risk') {
-                    return true;
-                }
-                return strtolower($alert['severity'] ?? '') === strtolower(str_replace(' risk', '', $category));
-            })->values()->all();
-
+    
+            // Normalize category and filter alerts
+            $category = strtolower($category);
+            if ($category === 'all risk') {
+                return array_values($allAlerts); // Ensure indexed array
+            }
+    
+            $severity = strtolower(str_replace(' risk', '', $category));
+            $filteredAlerts = array_filter($allAlerts, function($alert) use ($severity) {
+                return strtolower($alert['severity'] ?? '') === $severity;
+            });
+    
+            return array_values($filteredAlerts); // Ensure indexed array
+    
         } catch (\Exception $e) {
-            Log::error('Error getting alerts by category:', ['message' => $e->getMessage()]);
-            return null;
+            Log::error('Error in getAlertsByCategory:', [
+                'category' => $category,
+                'message' => $e->getMessage()
+            ]);
+            return [];
         }
     }
 

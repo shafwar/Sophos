@@ -364,6 +364,51 @@
             color: #fff !important;
         }
 
+        .event-details {
+    padding: 1rem;
+}
+
+.detail-section {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    color: #003B7B;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.detail-row:hover {
+    background: #f8f9fa;
+}
+
+.detail-label {
+    font-weight: 500;
+    min-width: 150px;
+    color: #495057;
+}
+
+.detail-value {
+    flex: 1;
+    color: #212529;
+    word-break: break-word;
+}
+
         /* Animations */
         @keyframes fadeInDown {
             from {
@@ -643,6 +688,9 @@
                     <!-- Details will be inserted here -->
                 </div>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
@@ -657,10 +705,24 @@
             once: true
         });
 
-        // Function to populate the modal with data
         function fetchDetailData(category) {
     const tableBody = document.getElementById('detailTableBody');
-    tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
+    const modalTitle = document.getElementById('detailModalLabel');
+    
+    // Update modal title
+    modalTitle.textContent = `Risk Details - ${category}`;
+    
+    // Show loading state
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </td>
+        </tr>`;
 
     const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
     detailModal.show();
@@ -668,51 +730,45 @@
     fetch(`/alerts/${encodeURIComponent(category.toLowerCase())}`)
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.message || `HTTP error! status: ${response.status}`);
-                });
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
-        .then(data => {
+        .then(response => {
             tableBody.innerHTML = '';
 
-            if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No alerts found for this category</td></tr>';
+            const data = response.data || [];
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            No alerts found for ${category}
+                        </td>
+                    </tr>`;
                 return;
             }
 
             data.forEach((item, index) => {
                 const row = document.createElement('tr');
-                row.style.animationDelay = `${index * 0.1}s`;
+                row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
 
-                let severityClass;
-                switch(item.severity?.toLowerCase()) {
-                    case 'high':
-                        severityClass = 'badge-high bg-danger';
-                        break;
-                    case 'medium':
-                        severityClass = 'badge-medium bg-warning';
-                        break;
-                    case 'low':
-                        severityClass = 'badge-low bg-success';
-                        break;
-                    default:
-                        severityClass = 'badge-secondary bg-secondary';
-                }
-
+                const severityClass = getSeverityClass(item.severity);
+                
                 row.innerHTML = `
                     <td class="text-muted small">${item.id || '-'}</td>
                     <td>${item.category || '-'}</td>
                     <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
-                    <td><span class="badge ${severityClass}">${item.severity || '-'}</span></td>
-                    <td class="small">${item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-'}</td>
+                    <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                    <td class="small">${formatDate(item.raisedAt)}</td>
                     <td>
-                        <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(item).replace(/"/g, '&quot;')})">
-                            View Details
-                        </button>
+                        <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
                     </td>
                 `;
+
+                // Add click event listener for View Details button
+                const viewButton = row.querySelector('.view-details');
+                viewButton.addEventListener('click', () => showEventDetails(item));
 
                 tableBody.appendChild(row);
             });
@@ -723,7 +779,7 @@
                 <tr>
                     <td colspan="6" class="text-center text-danger">
                         <div class="alert alert-danger mb-0">
-                            <strong>Error:</strong> ${error.message}<br>
+                            <strong>Error:</strong> An error occurred while fetching the data.<br>
                             Please try again later or contact support if the problem persists.
                         </div>
                     </td>
@@ -732,74 +788,24 @@
         });
 }
 
-function showEventDetails(item) {
-    const detailsContent = document.getElementById('eventDetailsContent');
-    let detailsHtml = `
-        <div class="event-details">
-            <div class="detail-section">
-                <h6 class="section-title">Event Information</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Event Type:</span>
-                    <span class="detail-value">${item.category || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Severity:</span>
-                    <span class="detail-value">
-                        <span class="badge bg-${item.severity === 'high' ? 'danger' : item.severity === 'medium' ? 'warning' : 'success'}">${item.severity || '-'}</span>
-                    </span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Time:</span>
-                    <span class="detail-value">${item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Description:</span>
-                    <span class="detail-value">${item.description || '-'}</span>
-                </div>
-            </div>
+// Helper function untuk mendapatkan class severity badge
+function getSeverityClass(severity) {
+    switch(severity?.toLowerCase()) {
+        case 'high':
+            return 'badge-high bg-danger';
+        case 'medium':
+            return 'badge-medium bg-warning';
+        case 'low':
+            return 'badge-low bg-success';
+        default:
+            return 'badge-secondary bg-secondary';
+    }
+}
 
-            <div class="detail-section">
-                <h6 class="section-title">Location & Source</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Location:</span>
-                    <span class="detail-value">${item.location || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Source:</span>
-                    <span class="detail-value">${item.source || '-'}</span>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h6 class="section-title">Endpoint Information</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Endpoint Type:</span>
-                    <span class="detail-value">${item.endpoint_type || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Endpoint ID:</span>
-                    <span class="detail-value">${item.endpoint_id || '-'}</span>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h6 class="section-title">System Information</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Event ID:</span>
-                    <span class="detail-value">${item.id || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Customer ID:</span>
-                    <span class="detail-value">${item.customer_id || '-'}</span>
-                </div>
-            </div>
-        </div>
-    `;
-
-    detailsContent.innerHTML = detailsHtml;
-
-    const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-    eventDetailsModal.show();
+// Helper function untuk format tanggal
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString();
 }
 
         // Chart.js Configuration
