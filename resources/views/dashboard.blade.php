@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         /* Root Variables */
@@ -642,12 +645,20 @@
     </div>
 
 <!-- Risk Details Modal -->
-<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+<div class="modal fade" id="riskDetailModal" tabindex="-1" aria-labelledby="riskDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detailModalLabel">Risk Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="riskDetailModalLabel">Risk Details</h5>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('risk')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="exportToCSV('risk')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                </div>
+                <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
@@ -662,8 +673,50 @@
                                 <th width="15%">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="detailTableBody">
-                            <!-- Data will be dynamically inserted here -->
+                        <tbody id="riskDetailTableBody">
+                            <!-- Risk data will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Details Modal -->
+<div class="modal fade" id="alertDetailModal" tabindex="-1" aria-labelledby="alertDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertDetailModalLabel">Alert Details</h5>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('alert')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="exportToCSV('alert')">
+                        <i class="fas fa-file-csv"></i> Export CSV
+                    </button>
+                </div>
+                <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="15%">ID</th>
+                                <th width="15%">Category</th>
+                                <th width="30%">Description</th>
+                                <th width="10%">Severity</th>
+                                <th width="15%">Date</th>
+                                <th width="15%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertDetailTableBody">
+                            <!-- Alert data will be dynamically inserted here -->
                         </tbody>
                     </table>
                 </div>
@@ -676,16 +729,16 @@
 </div>
 
 <!-- Event Details Modal -->
-<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Event Details</h5>
+                <h5 class="modal-title" id="eventDetailsModalLabel">Event Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="eventDetailsContent">
-                    <!-- Details will be inserted here -->
+                    <!-- Event details will be inserted here -->
                 </div>
             </div>
             <div class="modal-footer">
@@ -705,108 +758,9 @@
             once: true
         });
 
-        function fetchDetailData(category) {
-    const tableBody = document.getElementById('detailTableBody');
-    const modalTitle = document.getElementById('detailModalLabel');
-    
-    // Update modal title
-    modalTitle.textContent = `Risk Details - ${category}`;
-    
-    // Show loading state
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="6" class="text-center">
-                <div class="d-flex justify-content-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            </td>
-        </tr>`;
-
-    const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-    detailModal.show();
-
-    fetch(`/alerts/${encodeURIComponent(category.toLowerCase())}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(response => {
-            tableBody.innerHTML = '';
-
-            const data = response.data || [];
-            
-            if (data.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            No alerts found for ${category}
-                        </td>
-                    </tr>`;
-                return;
-            }
-
-            data.forEach((item, index) => {
-                const row = document.createElement('tr');
-                row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
-
-                const severityClass = getSeverityClass(item.severity);
-                
-                row.innerHTML = `
-                    <td class="text-muted small">${item.id || '-'}</td>
-                    <td>${item.category || '-'}</td>
-                    <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
-                    <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
-                    <td class="small">${formatDate(item.raisedAt)}</td>
-                    <td>
-                        <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
-                    </td>
-                `;
-
-                // Add click event listener for View Details button
-                const viewButton = row.querySelector('.view-details');
-                viewButton.addEventListener('click', () => showEventDetails(item));
-
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center text-danger">
-                        <div class="alert alert-danger mb-0">
-                            <strong>Error:</strong> An error occurred while fetching the data.<br>
-                            Please try again later or contact support if the problem persists.
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-}
-
-// Helper function untuk mendapatkan class severity badge
-function getSeverityClass(severity) {
-    switch(severity?.toLowerCase()) {
-        case 'high':
-            return 'badge-high bg-danger';
-        case 'medium':
-            return 'badge-medium bg-warning';
-        case 'low':
-            return 'badge-low bg-success';
-        default:
-            return 'badge-secondary bg-secondary';
-    }
-}
-
-// Helper function untuk format tanggal
-function formatDate(dateString) {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString();
-}
+        // Data storage variables
+        let currentRiskData = []; // For Risk Details
+        let currentAlertData = []; // For Alert Details
 
         // Chart.js Configuration
         Chart.defaults.font.family = 'Poppins';
@@ -1002,332 +956,416 @@ function formatDate(dateString) {
             }
         });
 
-        // Tambahkan fungsi untuk fetch data traffic risk
-async function fetchTrafficRiskData() {
-    try {
-        const response = await fetch('/traffic-risk/weekly');
-        if (!response.ok) throw new Error('Failed to fetch data');
-        const data = await response.json();
-        return data.data;
-    } catch (error) {
-        console.error('Error fetching traffic data:', error);
-        return [];
-    }
-}
+        function fetchDetailData(category) {
+            const tableBody = document.getElementById('riskDetailTableBody');
+            const modalTitle = document.getElementById('riskDetailModalLabel');
+            
+            modalTitle.textContent = `Risk Details - ${category}`;
+            
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
 
-// Fungsi untuk menampilkan modal detail
-async function showRiskDetails(month, riskLevel) {
-    try {
-        const response = await fetch(`/traffic-risk/details/${month}/${riskLevel}`);
-        if (!response.ok) throw new Error('Failed to fetch details');
-        const details = await response.json();
-        
-        // Update konten modal
-        const modalTitle = document.getElementById('detailModalLabel');
-        const modalBody = document.getElementById('detailTableBody');
-        
-        modalTitle.textContent = `${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk Details - ${month}`;
-        
-        modalBody.innerHTML = details.incidents.map(incident => `
-            <tr>
-                <td class="text-muted small">${incident.id || '-'}</td>
-                <td>${incident.category || '-'}</td>
-                <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
-                <td>
-                    <span class="badge ${getBadgeClass(riskLevel)}">
-                        ${riskLevel.toUpperCase()}
-                    </span>
-                </td>
-                <td class="small">${formatDate(incident.date)}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(incident)})">
-                        View Details
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        
-        // Tampilkan modal
-        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-        detailModal.show();
-    } catch (error) {
-        console.error('Error fetching risk details:', error);
-    }
-}
+            const riskModal = new bootstrap.Modal(document.getElementById('riskDetailModal'));
+            riskModal.show();
 
-// Fungsi helper untuk badge class
-function getBadgeClass(riskLevel) {
-    switch(riskLevel.toLowerCase()) {
-        case 'high': return 'badge-high bg-danger';
-        case 'medium': return 'badge-medium bg-warning';
-        case 'low': return 'badge-low bg-success';
-        default: return 'badge-secondary bg-secondary';
-    }
-}
+            fetch(`/alerts/${encodeURIComponent(category.toLowerCase())}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(response => {
+                    tableBody.innerHTML = '';
+                    currentRiskData = response.data || [];
+                    
+                    if (currentRiskData.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center">No alerts found for ${category}</td>
+                            </tr>`;
+                        return;
+                    }
 
-// Fungsi untuk format tanggal
-function formatDate(dateString) {
-    return new Date(dateString).toLocaleString();
-}
+                    currentRiskData.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
+                        
+                        const severityClass = getSeverityClass(item.severity);
+                        
+                        row.innerHTML = `
+                            <td class="text-muted small">${item.id || '-'}</td>
+                            <td>${item.category || '-'}</td>
+                            <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
+                            <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                            <td class="small">${formatDate(item.raisedAt)}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
+                            </td>
+                        `;
 
-async function initializeTrafficRiskChart() {
-    try {
-        const ctx = document.getElementById('trafficRiskChart').getContext('2d');
-        
-        // Destroy existing chart if any
-        if (window.trafficChart) {
-            window.trafficChart.destroy();
+                        const viewButton = row.querySelector('.view-details');
+                        viewButton.addEventListener('click', () => showEventDetails(item));
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">
+                                <div class="alert alert-danger mb-0">
+                                    <strong>Error:</strong> An error occurred while fetching the data.
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
         }
 
-        // Fetch data from API
-        const response = await fetch('/traffic-risk/weekly');
-        const jsonData = await response.json();
-        
-        if (!jsonData.success || !jsonData.data) {
-            throw new Error('Invalid data format received');
+        // Updated showMonthlyDetails function
+        function showMonthlyDetails(month) {
+            const tableBody = document.getElementById('alertDetailTableBody');
+            const modalTitle = document.getElementById('alertDetailModalLabel');
+            
+            modalTitle.textContent = `Alert Details - ${month}`;
+            
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>`;
+
+            const alertModal = new bootstrap.Modal(document.getElementById('alertDetailModal'));
+            alertModal.show();
+
+            fetch(`/traffic-risk/monthly-details/${month}`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(response => {
+                    tableBody.innerHTML = '';
+                    currentAlertData = response.incidents || [];
+                    
+                    if (currentAlertData.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center">No alerts found for ${month}</td>
+                            </tr>`;
+                        return;
+                    }
+
+                    currentAlertData.forEach((item, index) => {
+                        const row = document.createElement('tr');
+                        row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
+                        
+                        const severityClass = getSeverityClass(item.severity);
+                        
+                        row.innerHTML = `
+                            <td class="text-muted small">${item.id || '-'}</td>
+                            <td>${item.category || '-'}</td>
+                            <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
+                            <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                            <td class="small">${formatDate(item.date)}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
+                            </td>
+                        `;
+
+                        const viewButton = row.querySelector('.view-details');
+                        viewButton.addEventListener('click', () => showEventDetails(item));
+
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">
+                                <div class="alert alert-danger mb-0">
+                                    <strong>Error:</strong> An error occurred while fetching the data.
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
         }
 
-        const chartData = jsonData.data;
+        // Updated export functions
+        function exportToPDF(type) {
+            const data = type === 'risk' ? currentRiskData : currentAlertData;
+            const title = type === 'risk' ? 
+                document.getElementById('riskDetailModalLabel').textContent :
+                document.getElementById('alertDetailModalLabel').textContent;
 
-        window.trafficChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: chartData.map(item => item.month),
-                datasets: [
-                    {
-                        label: 'High Risk',
-                        data: chartData.map(item => item.highRisk),
-                        borderColor: '#dc3545',
-                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 10,
-                        pointStyle: 'circle'
-                    },
-                    {
-                        label: 'Medium Risk',
-                        data: chartData.map(item => item.mediumRisk),
-                        borderColor: '#ffc107',
-                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 10,
-                        pointStyle: 'circle'
-                    },
-                    {
-                        label: 'Low Risk',
-                        data: chartData.map(item => item.lowRisk),
-                        borderColor: '#28a745',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 10,
-                        pointStyle: 'circle'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                plugins: {
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
-                    }
-                },
-                onClick: async (e, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        const month = chartData[index].month;
-                        await showMonthDetails(month);
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+            if (!data || data.length === 0) {
+                alert('No data available to export');
+                return;
             }
-        });
-    } catch (error) {
-        console.error('Error initializing chart:', error);
-    }
-}
 
-// Function to show risk details
-async function showRiskDetails(month, riskLevel) {
-    try {
-        const response = await fetch(`/traffic-risk/details/${month}/${riskLevel}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch details');
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(16);
+            doc.text(title, 14, 15);
+            
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
+
+            const tableData = data.map(item => [
+                item.id || '-',
+                item.category || '-',
+                (item.description?.split('\n')[0] || '-').substring(0, 30) + '...',
+                item.severity?.toUpperCase() || '-',
+                formatDate(item.date || item.raisedAt)
+            ]);
+
+            doc.autoTable({
+                head: [['ID', 'Category', 'Description', 'Severity', 'Date']],
+                body: tableData,
+                startY: 30,
+                margin: { top: 30 },
+                styles: { fontSize: 8, cellPadding: 2 },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 50 },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 35 }
+                }
+            });
+
+            doc.save(`${title.replace(/\s+/g, '_').toLowerCase()}_${formatDateForFilename(new Date())}.pdf`);
         }
-        const details = await response.json();
-        
-        // Update modal content
-        const modalTitle = document.getElementById('detailModalLabel');
-        const modalBody = document.getElementById('detailTableBody');
-        
-        modalTitle.textContent = `${riskLevel.charAt(0).toUpperCase() + riskLevel.slice(1)} Risk Details - ${month}`;
-        
-        modalBody.innerHTML = details.incidents.map(incident => `
-            <tr>
-                <td class="text-muted small">${incident.id || '-'}</td>
-                <td>${incident.category || '-'}</td>
-                <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
-                <td>
-                    <span class="badge ${getBadgeClass(riskLevel)}">
-                        ${riskLevel.toUpperCase()}
-                    </span>
-                </td>
-                <td class="small">${formatDate(incident.date)}</td>
-                <td>
-                    <button class="btn btn-sm btn-info" onclick="showEventDetails(${JSON.stringify(incident)})">
-                        View Details
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        
-        // Show modal
-        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-        detailModal.show();
-    } catch (error) {
-        console.error('Error fetching risk details:', error);
-    }
-}
 
-function showEventDetails(item) {
-    const detailsContent = document.getElementById('eventDetailsContent');
-    let detailsHtml = `
-        <div class="event-details">
-            <div class="detail-section">
-                <h6 class="section-title">Event Information</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Event Type:</span>
-                    <span class="detail-value">${item.category || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Severity:</span>
-                    <span class="detail-value">
-                        <span class="badge bg-${item.severity === 'high' ? 'danger' : item.severity === 'medium' ? 'warning' : 'success'}">${item.severity || '-'}</span>
-                    </span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Time:</span>
-                    <span class="detail-value">${item.date ? new Date(item.date).toLocaleString() : '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Description:</span>
-                    <span class="detail-value">${item.description || '-'}</span>
-                </div>
-            </div>
+        function exportToCSV(type) {
+            const data = type === 'risk' ? currentRiskData : currentAlertData;
+            const title = type === 'risk' ? 
+                document.getElementById('riskDetailModalLabel').textContent :
+                document.getElementById('alertDetailModalLabel').textContent;
 
-            <div class="detail-section">
-                <h6 class="section-title">Location & Source</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Location:</span>
-                    <span class="detail-value">${item.location || '-'}</span>
+            if (!data || data.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+
+            const headers = ['ID', 'Category', 'Description', 'Severity', 'Date', 'Source', 'Location', 'Endpoint Type', 'Endpoint ID'];
+            
+            const csvData = data.map(item => ([
+                item.id || '-',
+                item.category || '-',
+                (item.description || '-').replace(/[\n,]/g, ' '),
+                item.severity?.toUpperCase() || '-',
+                formatDate(item.date || item.raisedAt),
+                item.source || '-',
+                item.location || '-',
+                item.endpoint_type || '-',
+                item.endpoint_id || '-'
+            ]));
+
+            const csvContent = [
+                headers.join(','),
+                ...csvData.map(row => row.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, `${title.replace(/\s+/g, '_').toLowerCase()}_${formatDateForFilename(new Date())}.csv`);
+        }
+
+        function showEventDetails(item) {
+            const detailsContent = document.getElementById('eventDetailsContent');
+            let detailsHtml = `
+                <div class="event-details">
+                    <div class="detail-section">
+                        <h6 class="section-title">Event Information</h6>
+                        <div class="detail-row">
+                            <span class="detail-label">Event Type:</span>
+                            <span class="detail-value">${item.category || '-'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Severity:</span>
+                            <span class="detail-value">
+                                <span class="badge bg-${item.severity === 'high' ? 'danger' : item.severity === 'medium' ? 'warning' : 'success'}">${item.severity || '-'}</span>
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Time:</span>
+                            <span class="detail-value">${item.date ? new Date(item.date).toLocaleString() : '-'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Description:</span>
+                            <span class="detail-value">${item.description || '-'}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h6 class="section-title">Location & Source</h6>
+                        <div class="detail-row">
+                            <span class="detail-label">Location:</span>
+                            <span class="detail-value">${item.location || '-'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Source:</span>
+                            <span class="detail-value">${item.source || '-'}</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <h6 class="section-title">Endpoint Information</h6>
+                        <div class="detail-row">
+                            <span class="detail-label">Endpoint Type:</span>
+                            <span class="detail-value">${item.endpoint_type || '-'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Endpoint ID:</span>
+                            <span class="detail-value">${item.endpoint_id || '-'}</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">Source:</span>
-                    <span class="detail-value">${item.source || '-'}</span>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <h6 class="section-title">Endpoint Information</h6>
-                <div class="detail-row">
-                    <span class="detail-label">Endpoint Type:</span>
-                    <span class="detail-value">${item.endpoint_type || '-'}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Endpoint ID:</span>
-                    <span class="detail-value">${item.endpoint_id || '-'}</span>
-                </div>
-            </div>
-        </div>
-    `;
-
-    detailsContent.innerHTML = detailsHtml;
-
-    const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-    eventDetailsModal.show();
-}
-
-// Helper function for badge classes
-function getBadgeClass(riskLevel) {
-    switch(riskLevel.toLowerCase()) {
-        case 'high': return 'badge-high bg-danger';
-        case 'medium': return 'badge-medium bg-warning';
-        case 'low': return 'badge-low bg-success';
-        default: return 'badge-secondary bg-secondary';
-    }
-}
-
-// Helper function to format date
-function formatDate(dateString) {
-    return new Date(dateString).toLocaleString();
-}
-
-async function showMonthDetails(month) {
-    try {
-        const response = await fetch(`/traffic-risk/monthly-details/${month}`);
-        if (!response.ok) throw new Error('Failed to fetch details');
-        const details = await response.json();
-        
-        const modalTitle = document.getElementById('detailModalLabel');
-        const modalBody = document.getElementById('detailTableBody');
-        
-        modalTitle.textContent = `Alert Details - ${month}`;
-        
-        if (!details.incidents || details.incidents.length === 0) {
-            modalBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center">No alerts found for ${month}</td>
-                </tr>
             `;
-        } else {
-            modalBody.innerHTML = details.incidents.map(incident => `
-                <tr>
-                    <td class="text-muted small">${incident.id || '-'}</td>
-                    <td>${incident.category || '-'}</td>
-                    <td class="description-cell">${incident.description?.split('\n')[0] || '-'}</td>
-                    <td>
-                        <span class="badge ${getBadgeClass(incident.severity)}">
-                            ${incident.severity?.toUpperCase() || '-'}
-                        </span>
-                    </td>
-                    <td class="small">${formatDate(incident.date)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info" onclick='showEventDetails(${JSON.stringify(incident)})'>
-                            View Details
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+
+            detailsContent.innerHTML = detailsHtml;
+
+            const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+            eventDetailsModal.show();
         }
-        
-        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-        detailModal.show();
-    } catch (error) {
-        console.error('Error fetching month details:', error);
-        alert('Failed to load month details. Please try again.');
-    }
-}
 
-// Initialize when document is ready
-document.addEventListener('DOMContentLoaded', initializeTrafficRiskChart);
+        // Helper functions
+        function getSeverityClass(severity) {
+            switch(severity?.toLowerCase()) {
+                case 'high': return 'badge-high bg-danger';
+                case 'medium': return 'badge-medium bg-warning';
+                case 'low': return 'badge-low bg-success';
+                default: return 'badge-secondary bg-secondary';
+            }
+        }
 
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            return new Date(dateString).toLocaleString();
+        }
+
+        function formatDateForFilename(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Traffic Risk Chart initialization
+        async function initializeTrafficRiskChart() {
+            try {
+                const ctx = document.getElementById('trafficRiskChart').getContext('2d');
+                
+                // Destroy existing chart if any
+                if (window.trafficChart) {
+                    window.trafficChart.destroy();
+                }
+
+                const response = await fetch('/traffic-risk/weekly');
+                const jsonData = await response.json();
+                
+                if (!jsonData.success || !jsonData.data) {
+                    throw new Error('Invalid data format received');
+                }
+
+                const chartData = jsonData.data;
+
+                window.trafficChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.map(item => item.month),
+                        datasets: [
+                            {
+                                label: 'High Risk',
+                                data: chartData.map(item => item.highRisk),
+                                borderColor: '#dc3545',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 6,
+                                pointHoverRadius: 10,
+                                pointStyle: 'circle'
+                            },
+                            {
+                                label: 'Medium Risk',
+                                data: chartData.map(item => item.mediumRisk),
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 6,
+                                pointHoverRadius: 10,
+                                pointStyle: 'circle'
+                            },
+                            {
+                                label: 'Low Risk',
+                                data: chartData.map(item => item.lowRisk),
+                                borderColor: '#28a745',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                borderWidth: 2,
+                                pointRadius: 6,
+                                pointHoverRadius: 10,
+                                pointStyle: 'circle'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        onClick: async (e, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const month = chartData[index].month;
+                                await showMonthlyDetails(month);
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing chart:', error);
+            }
+        }
+
+        // Initialize everything when document is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize AOS
+            AOS.init({
+                duration: 800,
+                once: true
+            });
+
+            // Initialize traffic risk chart
+            initializeTrafficRiskChart();
+        });
     </script>
 </body>
 </html>

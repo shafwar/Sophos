@@ -169,39 +169,39 @@ class DashboardController extends Controller
         ];
     }
 
-    public function getAlertsByCategory($category)
-    {
-        try {
-            Log::info('Getting alerts for category: ' . $category);
-            
-            $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
-                return $this->sophosApi->getAlertsByCategory($category);
-            });
-    
-            // Ensure we always return an array
-            $alerts = is_array($alerts) ? $alerts : [];
-    
-            return response()->json([
-                'success' => true,
-                'data' => $alerts,
-                'category' => $category,
-                'total' => count($alerts)
-            ]);
-    
-        } catch (\Exception $e) {
-            Log::error('Error in getAlertsByCategory:', [
-                'category' => $category,
-                'message' => $e->getMessage()
-            ]);
-    
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while fetching the data.',
-                'data' => [],
-                'category' => $category
-            ], 500);
-        }
+public function getAlertsByCategory($category)
+{
+    try {
+        Log::info('Getting alerts for category: ' . $category);
+        
+        $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
+            return $this->sophosApi->getAlertsByCategory($category);
+        });
+
+        // Ensure we always return an array
+        $alerts = is_array($alerts) ? $alerts : [];
+
+        return response()->json([
+            'success' => true,
+            'data' => $alerts,
+            'category' => $category,
+            'total' => count($alerts)
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error in getAlertsByCategory:', [
+            'category' => $category,
+            'message' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while fetching the data.',
+            'data' => [],
+            'category' => $category
+        ], 500);
     }
+}
 
 
     public function getMetrics()

@@ -46,6 +46,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
 
+    // Di web.php, dalam group middleware auth
+    Route::get('/export/alerts/{category}/pdf', [DashboardController::class, 'exportAlertsPDF'])->name('alerts.export.pdf');
+    Route::get('/export/alerts/{category}/csv', [DashboardController::class, 'exportAlertsCSV'])->name('alerts.export.csv');
+
     // Profile Routes
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('profile.show');
