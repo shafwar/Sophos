@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - PeSo (Pertagas Sophos)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
@@ -368,49 +369,49 @@
         }
 
         .event-details {
-    padding: 1rem;
-}
+            padding: 1rem;
+        }
 
-.detail-section {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
+        .detail-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
 
-.section-title {
-    color: #003B7B;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e9ecef;
-    font-weight: 600;
-}
+        .section-title {
+            color: #003B7B;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+        }
 
-.detail-row {
-    display: flex;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    background: white;
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
 
-.detail-row:hover {
-    background: #f8f9fa;
-}
+        .detail-row:hover {
+            background: #f8f9fa;
+        }
 
-.detail-label {
-    font-weight: 500;
-    min-width: 150px;
-    color: #495057;
-}
+        .detail-label {
+            font-weight: 500;
+            min-width: 150px;
+            color: #495057;
+        }
 
-.detail-value {
-    flex: 1;
-    color: #212529;
-    word-break: break-word;
-}
+        .detail-value {
+            flex: 1;
+            color: #212529;
+            word-break: break-word;
+        }
 
         /* Animations */
         @keyframes fadeInDown {
@@ -454,6 +455,70 @@
                 max-width: 95%;
                 margin: 0.5rem auto;
             }
+        }
+
+        /* High Risk Alert Animations */
+        @keyframes highRiskBlink {
+            0% { 
+                box-shadow: 0 0 10px rgba(220, 53, 69, 0.8);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(220, 53, 69, 0.9);
+                transform: scale(1.02);
+            }
+            100% { 
+                box-shadow: 0 0 10px rgba(220, 53, 69, 0.8);
+                transform: scale(1);
+            }
+        }
+
+        .high-risk-warning {
+            animation: highRiskBlink 1.5s infinite;
+        }
+
+        /* Alert Notifications */
+        .alert-floating {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 400px;
+            background-color: #fff;
+            border-left: 4px solid #dc3545;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            padding: 1rem;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .alert-floating.show {
+            transform: translateX(0);
+        }
+
+        .alert-floating .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-floating .alert-icon {
+            font-size: 1.5rem;
+            color: #dc3545;
+        }
+
+        .alert-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -506,14 +571,24 @@
                             <i class="fas fa-bell"></i>
                             <span>Alerts</span>
                         </a>
-                    </li>s
+                    </li>
 
                     <!-- User Icons -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-cog"></i>
-                        </a>
-                    </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                        <i class="fas fa-cog"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <div class="dropdown-item d-flex align-items-center justify-content-between">
+                                <span><i class="fas fa-moon me-2"></i>Dark Mode</span>
+                                <div class="form-check form-switch ms-2">
+                                    <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
@@ -851,7 +926,11 @@
             options: riskChartOptions
         });
 
-        new Chart(document.getElementById('highRiskChart'), {
+        // High Risk Chart Initialization
+        const highRiskChartElement = document.getElementById('highRiskChart');
+        highRiskChartElement.setAttribute('data-value', highRisk);
+
+        new Chart(highRiskChartElement, {
             type: 'doughnut',
             plugins: [centerTextPlugin],
             data: {
@@ -1341,9 +1420,130 @@
             }
         }
 
+        // Fungsi untuk mengelola notifikasi
+        class AlertManager {
+            constructor() {
+                this.alerts = new Set();
+                this.alertCount = 0;
+            }
+
+            // Menampilkan notifikasi baru
+            showAlert(message, type = 'high') {
+                const alertId = `alert-${Date.now()}`;
+                const alertElement = document.createElement('div');
+                alertElement.className = `alert-floating ${type}-alert`;
+                alertElement.id = alertId;
+                
+                alertElement.innerHTML = `
+                    <div class="alert-content">
+                        <i class="fas fa-exclamation-triangle alert-icon"></i>
+                        <div class="alert-message">
+                            <strong>Security Alert!</strong>
+                            <p>${message}</p>
+                        </div>
+                        <button type="button" class="btn-close" onclick="alertManager.dismissAlert('${alertId}')"></button>
+                    </div>
+                `;
+
+                document.body.appendChild(alertElement);
+                this.alerts.add(alertId);
+                this.updateAlertBadge();
+
+                // Animasi masuk
+                setTimeout(() => alertElement.classList.add('show'), 100);
+
+                // Auto dismiss setelah 5 detik
+                setTimeout(() => this.dismissAlert(alertId), 5000);
+            }
+
+            // Menghilangkan notifikasi
+            dismissAlert(alertId) {
+                const alertElement = document.getElementById(alertId);
+                if (alertElement) {
+                    alertElement.classList.remove('show');
+                    setTimeout(() => {
+                        alertElement.remove();
+                        this.alerts.delete(alertId);
+                        this.updateAlertBadge();
+                    }, 300);
+                }
+            }
+
+            // Update badge jumlah alert
+            updateAlertBadge() {
+                const alertNavLink = document.querySelector('.nav-link .fa-bell').parentElement;
+                const existingBadge = alertNavLink.querySelector('.alert-badge');
+                
+                if (this.alerts.size > 0) {
+                    if (!existingBadge) {
+                        const badge = document.createElement('span');
+                        badge.className = 'alert-badge';
+                        badge.textContent = this.alerts.size;
+                        alertNavLink.appendChild(badge);
+                    } else {
+                        existingBadge.textContent = this.alerts.size;
+                    }
+                } else if (existingBadge) {
+                    existingBadge.remove();
+                }
+            }
+        }
+
+        // Inisialisasi Alert Manager
+        const alertManager = new AlertManager();
+
+        // Fungsi untuk memeriksa risiko tinggi
+        function checkHighRisk(highRiskCount) {
+            const highRiskChart = document.getElementById('highRiskChart');
+            const highRiskCard = highRiskChart.closest('.dashboard-card');
+            
+            if (highRiskCount > 0) {
+                highRiskCard.classList.add('high-risk-warning');
+                alertManager.showAlert(`${highRiskCount} High Risk threats detected! Immediate attention required.`);
+            } else {
+                highRiskCard.classList.remove('high-risk-warning');
+            }
+        }
+
+        // Polling untuk update data secara real-time
+        function startRealTimeMonitoring() {
+            setInterval(async () => {
+                try {
+                    const response = await fetch('/metrics');
+                    const data = await response.json();
+                    
+                    if (data.high > 0) {
+                        checkHighRisk(data.high);
+                    }
+                    
+                    // Update chart data
+                    updateChartData(data);
+                } catch (error) {
+                    console.error('Error fetching metrics:', error);
+                }
+            }, 30000); // Check setiap 30 detik
+        }
+
+        // Update data chart
+        function updateChartData(data) {
+            const charts = {
+                'highRiskChart': data.high,
+                'mediumRiskChart': data.medium,
+                'lowRiskChart': data.low
+            };
+
+            Object.entries(charts).forEach(([chartId, value]) => {
+                const chart = Chart.getChart(chartId);
+                if (chart) {
+                    chart.data.datasets[0].data = [value, data.total - value];
+                    chart.update();
+                }
+            });
+        }
+
         // Initialize everything when document is ready
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize AOS
+            // Initialize existing features
             AOS.init({
                 duration: 800,
                 once: true
@@ -1351,6 +1551,13 @@
 
             // Initialize traffic risk chart
             initializeTrafficRiskChart();
+            
+            // Start real-time monitoring
+            startRealTimeMonitoring();
+            
+            // Initial high risk check
+            const initialHighRiskCount = parseInt(document.getElementById('highRiskChart').getAttribute('data-value') || '0');
+            checkHighRisk(initialHighRiskCount);
         });
     </script>
 </body>
