@@ -16,12 +16,7 @@
                         <option value="{{ $group }}">{{ $group }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="col-md-4 text-end">
-                <a href="#" class="btn btn-outline-primary btn-lg me-2" onclick="saveCustomReport()">Save as Custom Report</a>
-                <a href="#" class="btn btn-outline-primary btn-lg me-2" onclick="exportToCSV()">Export to CSV</a>
-                <a href="#" class="btn btn-outline-primary btn-lg" onclick="exportToPDF()">Export to PDF</a>
-            </div>
+            </div>s
         </div>
 
         <!-- Statistics Cards -->
