@@ -488,18 +488,6 @@
                         </ul>
                     </li>
 
-                    <!-- Products -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-box"></i>
-                            <span>My Products</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Active Products</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                        </ul>
-                    </li>
-
                     <!-- Threat Analysis -->
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" data-bs-toggle="dropdown">
@@ -518,15 +506,7 @@
                             <i class="fas fa-bell"></i>
                             <span>Alerts</span>
                         </a>
-                    </li>
-
-                    <!-- Reports -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Reports</span>
-                        </a>
-                    </li>
+                    </li>s
 
                     <!-- User Icons -->
                     <li class="nav-item">
@@ -556,6 +536,12 @@
             </div>
         </div>
     </nav>
+
+        <!-- Sophos Central Dashboard Header -->
+    <div class="container-fluid px-4 py-3 mt-4" style="background: white; border-bottom: 1px solid #e5e7eb;">
+        <h2 class="mb-1" style="color: #1b258f; font-size: 1.75rem; font-weight: 600;">Sophos Central Dashboard</h2>
+        <p class="text-muted mb-0" style="font-size: 0.95rem;">See a snapshot of your security protection</p>
+    </div>
 
     <div class="container mt-5">
         <!-- Summary Metrics -->

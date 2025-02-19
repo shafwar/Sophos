@@ -27,18 +27,6 @@
                     </ul>
                 </li>
 
-                <!-- Products -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-box"></i>
-                        <span>My Products</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Active Products</a></li>
-                        <li><a class="dropdown-item" href="#">Settings</a></li>
-                    </ul>
-                </li>
-
                 <!-- Threat Analysis -->
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" data-bs-toggle="dropdown">
@@ -56,14 +44,6 @@
                     <a class="nav-link" href="#">
                         <i class="fas fa-bell"></i>
                         <span>Alerts</span>
-                    </a>
-                </li>
-
-                <!-- Reports -->
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Reports</span>
                     </a>
                 </li>
 

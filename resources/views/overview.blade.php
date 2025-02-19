@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container-fluid">
     <!-- Recent threat graphs Section -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
@@ -50,7 +51,7 @@
 
     <div class="row g-4">
         <!-- Devices and Users Summary -->
-        <div class="col-md-6">
+        <div class="col-md-20">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center mb-4">
@@ -76,47 +77,6 @@
                             <span class="text-muted">Not Protected</span>
                             <span>4</span>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Web Control -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-4">
-                        <i class="fas fa-globe me-2"></i>
-                        <h5 class="card-title mb-0">Web control</h5>
-                    </div>
-                    <div class="row g-5">
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h2 class="display-5 fw-semibold mb-3">0</h2>
-                                <p class="text-secondary mb-0">Web Threats Blocked</p>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h2 class="display-5 fw-semibold mb-3">718</h2>
-                                <p class="text-secondary mb-0">Policy Violations Blocked</p>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h2 class="display-5 fw-semibold mb-3">41294</h2>
-                                <p class="text-secondary mb-0">Policy Warnings Issued</p>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center">
-                                <h2 class="display-5 fw-semibold mb-3">41230</h2>
-                                <p class="text-secondary mb-0">Policy Warnings Proceeded</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end mt-4">
-                        <span class="text-secondary small">last 30 days</span>
                     </div>
                 </div>
             </div>
