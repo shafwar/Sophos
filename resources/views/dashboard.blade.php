@@ -459,15 +459,15 @@
 
         /* High Risk Alert Animations */
         @keyframes highRiskBlink {
-            0% { 
+            0% {
                 box-shadow: 0 0 10px rgba(220, 53, 69, 0.8);
                 transform: scale(1);
             }
-            50% { 
+            50% {
                 box-shadow: 0 0 20px rgba(220, 53, 69, 0.9);
                 transform: scale(1.02);
             }
-            100% { 
+            100% {
                 box-shadow: 0 0 10px rgba(220, 53, 69, 0.8);
                 transform: scale(1);
             }
@@ -1044,9 +1044,9 @@
         function fetchDetailData(category) {
             const tableBody = document.getElementById('riskDetailTableBody');
             const modalTitle = document.getElementById('riskDetailModalLabel');
-            
+
             modalTitle.textContent = `Risk Details - ${category}`;
-            
+
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center">
@@ -1069,7 +1069,7 @@
                 .then(response => {
                     tableBody.innerHTML = '';
                     currentRiskData = response.data || [];
-                    
+
                     if (currentRiskData.length === 0) {
                         tableBody.innerHTML = `
                             <tr>
@@ -1081,9 +1081,9 @@
                     currentRiskData.forEach((item, index) => {
                         const row = document.createElement('tr');
                         row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
-                        
+
                         const severityClass = getSeverityClass(item.severity);
-                        
+
                         row.innerHTML = `
                             <td class="text-muted small">${item.id || '-'}</td>
                             <td>${item.category || '-'}</td>
@@ -1119,9 +1119,9 @@
         function showMonthlyDetails(month) {
             const tableBody = document.getElementById('alertDetailTableBody');
             const modalTitle = document.getElementById('alertDetailModalLabel');
-            
+
             modalTitle.textContent = `Alert Details - ${month}`;
-            
+
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center">
@@ -1142,7 +1142,7 @@
                 .then(response => {
                     tableBody.innerHTML = '';
                     currentAlertData = response.incidents || [];
-                    
+
                     if (currentAlertData.length === 0) {
                         tableBody.innerHTML = `
                             <tr>
@@ -1154,9 +1154,9 @@
                     currentAlertData.forEach((item, index) => {
                         const row = document.createElement('tr');
                         row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
-                        
+
                         const severityClass = getSeverityClass(item.severity);
-                        
+
                         row.innerHTML = `
                             <td class="text-muted small">${item.id || '-'}</td>
                             <td>${item.category || '-'}</td>
@@ -1191,7 +1191,7 @@
         // Updated export functions
         function exportToPDF(type) {
             const data = type === 'risk' ? currentRiskData : currentAlertData;
-            const title = type === 'risk' ? 
+            const title = type === 'risk' ?
                 document.getElementById('riskDetailModalLabel').textContent :
                 document.getElementById('alertDetailModalLabel').textContent;
 
@@ -1202,10 +1202,10 @@
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
+
             doc.setFontSize(16);
             doc.text(title, 14, 15);
-            
+
             doc.setFontSize(10);
             doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
 
@@ -1237,7 +1237,7 @@
 
         function exportToCSV(type) {
             const data = type === 'risk' ? currentRiskData : currentAlertData;
-            const title = type === 'risk' ? 
+            const title = type === 'risk' ?
                 document.getElementById('riskDetailModalLabel').textContent :
                 document.getElementById('alertDetailModalLabel').textContent;
 
@@ -1247,7 +1247,7 @@
             }
 
             const headers = ['ID', 'Category', 'Description', 'Severity', 'Date', 'Source', 'Location', 'Endpoint Type', 'Endpoint ID'];
-            
+
             const csvData = data.map(item => ([
                 item.id || '-',
                 item.category || '-',
@@ -1350,7 +1350,7 @@
         async function initializeTrafficRiskChart() {
             try {
                 const ctx = document.getElementById('trafficRiskChart').getContext('2d');
-                
+
                 // Destroy existing chart if any
                 if (window.trafficChart) {
                     window.trafficChart.destroy();
@@ -1358,7 +1358,7 @@
 
                 const response = await fetch('/traffic-risk/weekly');
                 const jsonData = await response.json();
-                
+
                 if (!jsonData.success || !jsonData.data) {
                     throw new Error('Invalid data format received');
                 }
@@ -1453,7 +1453,7 @@
                 const alertElement = document.createElement('div');
                 alertElement.className = `alert-floating ${type}-alert`;
                 alertElement.id = alertId;
-                
+
                 alertElement.innerHTML = `
                     <div class="alert-content">
                         <i class="fas fa-exclamation-triangle alert-icon"></i>
@@ -1493,7 +1493,7 @@
             updateAlertBadge() {
                 const alertNavLink = document.querySelector('.nav-link .fa-bell').parentElement;
                 const existingBadge = alertNavLink.querySelector('.alert-badge');
-                
+
                 if (this.alerts.size > 0) {
                     if (!existingBadge) {
                         const badge = document.createElement('span');
@@ -1516,7 +1516,7 @@
         function checkHighRisk(highRiskCount) {
             const highRiskChart = document.getElementById('highRiskChart');
             const highRiskCard = highRiskChart.closest('.dashboard-card');
-            
+
             if (highRiskCount > 0) {
                 highRiskCard.classList.add('high-risk-warning');
                 alertManager.showAlert(`${highRiskCount} High Risk threats detected! Immediate attention required.`);
@@ -1531,11 +1531,11 @@
                 try {
                     const response = await fetch('/metrics');
                     const data = await response.json();
-                    
+
                     if (data.high > 0) {
                         checkHighRisk(data.high);
                     }
-                    
+
                     // Update chart data
                     updateChartData(data);
                 } catch (error) {
@@ -1571,10 +1571,10 @@
 
             // Initialize traffic risk chart
             initializeTrafficRiskChart();
-            
+
             // Start real-time monitoring
             startRealTimeMonitoring();
-            
+
             // Initial high risk check
             const initialHighRiskCount = parseInt(document.getElementById('highRiskChart').getAttribute('data-value') || '0');
             checkHighRisk(initialHighRiskCount);

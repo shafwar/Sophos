@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sophos Endpoint Protection Dashboard</title>
 
-    <!-- CSS Dependencies -->
+    <!-- Core CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Animation Libraries -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <style>
-        /* Root Variables */
         :root {
             --primary-color: #003B7B;
             --secondary-color: #00BFFF;
@@ -26,20 +33,30 @@
             --text-dark: #333;
             --text-light: #666;
             --bg-light: #f8f9fa;
+            --transition-speed: 0.3s;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* Base Styles */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--accent-color);
             margin-top: 80px;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* Navbar Styles */
+        /* Enhanced Navbar Styles */
         .navbar {
-            background-color: #1b258f;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #2a3bad 100%);
             padding: 0.8rem 2rem;
-            transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all var(--transition-speed) ease;
         }
 
         .navbar-brand {
@@ -48,20 +65,12 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding: 0.5rem 0;
         }
 
         .navbar-brand i {
             font-size: 1.4rem;
-        }
-
-        .navbar-brand:hover {
-            color: #fff;
-        }
-
-        .navbar-nav {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
+            color: var(--secondary-blue);
         }
 
         .navbar-nav .nav-link {
@@ -71,19 +80,12 @@
             align-items: center;
             gap: 0.5rem;
             position: relative;
-            transition: all 0.2s ease;
-        }
-
-        .navbar-nav .nav-link i {
-            font-size: 1.1rem;
+            transition: all var(--transition-speed) ease;
         }
 
         .navbar-nav .nav-link:hover {
             color: white !important;
-        }
-
-        .navbar-nav .nav-link:hover::after {
-            width: 80%;
+            transform: translateY(-2px);
         }
 
         .navbar-nav .nav-link::after {
@@ -93,32 +95,36 @@
             left: 50%;
             width: 0;
             height: 2px;
-            background-color: #4fc3f7;
-            transition: all 0.3s ease;
+            background: var(--secondary-blue);
+            transition: all var(--transition-speed) ease;
             transform: translateX(-50%);
         }
 
-        /* Tambahkan di bagian style app.blade.php */
+        .navbar-nav .nav-link:hover::after {
+            width: 80%;
+        }
 
-        /* Dropdown Styles */
+        /* Enhanced Dropdown Styles */
         .dropdown-menu {
-            background-color: white;
+            background: white;
             border: none;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             animation: fadeInDown 0.3s ease;
             margin-top: 0.5rem;
+            padding: 0.5rem;
         }
 
         .dropdown-item {
             display: flex;
             align-items: center;
             padding: 0.7rem 1.2rem;
-            transition: all 0.2s ease;
+            border-radius: var(--border-radius);
+            transition: all var(--transition-speed) ease;
         }
 
         .dropdown-item:hover {
-            background-color: #f5f5f5;
+            background: var(--bg-light);
             transform: translateX(5px);
         }
 
@@ -126,32 +132,10 @@
             width: 20px;
             text-align: center;
             margin-right: 10px;
+            color: var(--primary-blue);
         }
 
-        .dropdown-item.text-danger {
-            color: var(--danger-color) !important;
-        }
-
-        .dropdown-item.text-danger:hover {
-            background-color: rgba(220, 53, 69, 0.1);
-        }
-
-        .dropdown-menu-end {
-            right: 0;
-            left: auto;
-        }
-
-        .dropdown-item button {
-            background: none;
-            border: none;
-            padding: 0;
-            width: 100%;
-            text-align: left;
-            display: flex;
-            align-items: center;
-        }
-
-            /* Custom scrollbar */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -171,7 +155,14 @@
             background: #555;
         }
 
-        /* Animation */
+        /* Content Container */
+        .main-content {
+            min-height: calc(100vh - 80px);
+            padding: 2rem;
+            margin-top: 1rem;
+        }
+
+        /* Animations */
         @keyframes fadeInDown {
             from {
                 opacity: 0;
@@ -182,22 +173,106 @@
                 transform: translateY(0);
             }
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Utility Classes */
+        .shadow-hover {
+            transition: all var(--transition-speed) ease;
+        }
+
+        .shadow-hover:hover {
+            box-shadow: var(--box-shadow);
+            transform: translateY(-2px);
+        }
+
+        .rounded-custom {
+            border-radius: var(--border-radius);
+        }
     </style>
 
     @stack('styles')
 </head>
 <body>
-    <!-- Include navbar -->
+    <!-- Navbar -->
     @include('layouts.navbar')
 
     <!-- Main Content -->
-    <div class="container-fluid p-4">
+    <div class="main-content">
         @yield('content')
     </div>
 
-    <!-- Scripts -->
+    <!-- Loading Spinner Template -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <!-- Initialize Global Scripts -->
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+
+        // Setup CSRF Token for AJAX requests
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Global loading spinner functions
+        window.showLoading = function() {
+            document.getElementById('loadingSpinner').style.display = 'flex';
+        }
+
+        window.hideLoading = function() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Handle errors globally
+        window.handleError = function(error) {
+            console.error('Error:', error);
+            // Add your error handling logic here
+        }
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 
     @stack('scripts')
 </body>
