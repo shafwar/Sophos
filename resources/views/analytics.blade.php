@@ -16,7 +16,7 @@
                         <option value="{{ $group }}">{{ $group }}</option>
                     @endforeach
                 </select>
-            </div>s
+            </div>
         </div>
 
         <!-- Statistics Cards -->

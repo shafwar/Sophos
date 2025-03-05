@@ -173,7 +173,7 @@ public function getAlertsByCategory($category)
 {
     try {
         Log::info('Getting alerts for category: ' . $category);
-        
+
         $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
             return $this->sophosApi->getAlertsByCategory($category);
         });
@@ -226,9 +226,9 @@ public function getAlertsByCategory($category)
     try {
         $sophosService = app(SophosApiService::class);
         $alerts = $sophosService->getAllAlerts();
-        
+
         Log::info('Alerts received:', ['count' => count($alerts)]);
-        
+
         // Group alerts by month and risk level
         $monthlyData = collect($alerts)->groupBy(function ($alert) {
             return Carbon::parse($alert['raisedAt'])->format('M');
@@ -240,7 +240,7 @@ public function getAlertsByCategory($category)
             ];
         });
 
-        
+
 
         // Transform into the format needed for the chart
         $chartData = $monthlyData->map(function ($risks, $month) {
@@ -265,10 +265,10 @@ public function getTrafficRiskDetails($month, $level)
     try {
         $sophosService = app(SophosApiService::class);
         $alerts = $sophosService->getAllAlerts();
-        
+
         // Filter alerts by month and risk level
         $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level) {
-            return Carbon::parse($alert['raisedAt'])->format('M') === $month 
+            return Carbon::parse($alert['raisedAt'])->format('M') === $month
                 && strtolower($alert['severity']) === strtolower($level);
         })->map(function ($alert) {
             return [
@@ -301,7 +301,7 @@ public function getMonthlyDetails($month)
 {
     try {
         $alerts = $this->sophosApi->getAllAlerts();
-        
+
         // Filter alerts untuk bulan yang dipilih
         $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month) {
             return Carbon::parse($alert['raisedAt'])->format('M') === $month;
@@ -334,7 +334,85 @@ public function getMonthlyDetails($month)
 }
     public function overview()
     {
-        return view('overview', ['pageTitle' => 'Overview']);
+        try {
+            // Dapatkan metrics dari Sophos API dan cache selama 5 menit
+            $metrics = Cache::remember('dashboard_metrics', 300, function () {
+                return $this->sophosApi->getMetrics();
+            });
+
+            // Jika metrics gagal didapat, gunakan default
+            if (!$metrics) {
+                $metrics = $this->getDefaultMetrics();
+            }
+
+            // Siapkan data dashboard
+            $data = [
+                'metrics' => $metrics,
+                'workToBill' => 500000,  // Contoh nilai statis
+                'quotedWork' => 120000,
+                'contracted' => 350000,
+                'jobMargin' => 90000,
+                'monthlyJobs' => collect([
+                    ['month' => 'Jan', 'count' => 15],
+                    ['month' => 'Feb', 'count' => 18],
+                    ['month' => 'Mar', 'count' => 12],
+                    ['month' => 'Apr', 'count' => 20],
+                    ['month' => 'May', 'count' => 16],
+                    ['month' => 'Jun', 'count' => 22]
+                ]),
+                'winPercentage' => 60,
+                'receivables' => collect([
+                    [
+                        'invoice_number' => 'INV-2024-001',
+                        'date' => Carbon::now()->subDays(5),
+                        'amount' => 32000
+                    ],
+                    [
+                        'invoice_number' => 'INV-2024-002',
+                        'date' => Carbon::now()->subDays(3),
+                        'amount' => 14000
+                    ]
+                ]),
+                'activeJobs' => collect([
+                    [
+                        'customer' => [
+                            'name' => 'ABC Company'
+                        ],
+                        'job_number' => '15001',
+                        'status' => 'In Progress',
+                        'value' => 22000
+                    ],
+                    [
+                        'customer' => [
+                            'name' => 'Westgate School'
+                        ],
+                        'job_number' => '65110',
+                        'status' => 'Contracted',
+                        'value' => 44000
+                    ]
+                ]),
+                'pageTitle' => 'Overview'
+            ];
+
+            return view('overview', $data);
+
+        } catch (\Exception $e) {
+            Log::error('Error in overview:', ['message' => $e->getMessage()]);
+
+            // Return view dengan data default jika terjadi error
+            return view('overview', [
+                'metrics' => $this->getDefaultMetrics(),
+                'workToBill' => 0,
+                'quotedWork' => 0,
+                'contracted' => 0,
+                'jobMargin' => 0,
+                'monthlyJobs' => collect([]),
+                'winPercentage' => 0,
+                'receivables' => collect([]),
+                'activeJobs' => collect([]),
+                'pageTitle' => 'Overview'
+            ]);
+        }
     }
 
     public function reports()
@@ -379,3 +457,5 @@ public function getMonthlyDetails($month)
         return view('reports', compact('stats', 'computers', 'computerGroups'));
     }
 }
+
+
