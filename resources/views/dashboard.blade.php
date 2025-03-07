@@ -540,6 +540,230 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        /* Enhanced Traffic Risk Card */
+        .traffic-risk-card {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .traffic-risk-card h5 {
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-info {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            cursor: pointer;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        /* Enhanced Legend */
+        .enhanced-legend {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            background-color: white;
+        }
+
+        .legend-item:hover {
+            background-color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .legend-item::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: currentColor;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .legend-item:hover::after {
+            width: 80%;
+        }
+
+        .legend-item.active {
+            border-color: #1b258f;
+            background-color: rgba(27, 37, 143, 0.05);
+            font-weight: 700;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .legend-text {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .filter-icon {
+            margin-left: 10px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .legend-item:hover .filter-icon {
+            opacity: 1;
+            transform: rotate(-15deg);
+        }
+
+        .legend-item.active .filter-icon {
+            opacity: 1;
+            color: #1b258f;
+        }
+
+        /* High Risk specific styling */
+        .high-risk-filter {
+            border-left: 3px solid #dc3545;
+        }
+
+        .high-risk-filter:hover {
+            background-color: rgba(220, 53, 69, 0.03);
+        }
+
+        .high-risk-filter.active {
+            background-color: rgba(220, 53, 69, 0.08);
+            border-color: #dc3545;
+        }
+
+        /* Medium Risk specific styling */
+        .medium-risk-filter {
+            border-left: 3px solid #ffc107;
+        }
+
+        .medium-risk-filter:hover {
+            background-color: rgba(255, 193, 7, 0.03);
+        }
+
+        .medium-risk-filter.active {
+            background-color: rgba(255, 193, 7, 0.08);
+            border-color: #ffc107;
+        }
+
+        /* Low Risk specific styling */
+        .low-risk-filter {
+            border-left: 3px solid #28a745;
+        }
+
+        .low-risk-filter:hover {
+            background-color: rgba(40, 167, 69, 0.03);
+        }
+
+        .low-risk-filter.active {
+            background-color: rgba(40, 167, 69, 0.08);
+            border-color: #28a745;
+        }
+
+        /* Filter Status Improvements */
+        .filter-status {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 8px;
+            background-color: rgba(0,0,0,0.02);
+            border-radius: 8px;
+        }
+
+        .filter-status .badge {
+            font-size: 0.85rem;
+            padding: 8px 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin: 3px 5px;
+            transition: all 0.2s ease;
+        }
+
+        .filter-status .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+        }
+
+        /* Custom tooltip styling */
+        .tooltip .tooltip-inner {
+            max-width: 250px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            background-color: #1b258f;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .tooltip .arrow::before {
+            border-top-color: #1b258f;
+        }
+
+        .filter-label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .filter-label {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .enhanced-legend {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .legend-item {
+                margin: 5px 0;
+            }
+        }
+
+        /* Menyembunyikan legenda default Chart.js */
+        .chartjs-legend,
+        .chartjs-render-monitor + ul {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -715,11 +939,44 @@
             </div>
         </div>
 
-        <!-- Traffic Overview -->
-        <div class="dashboard-card" data-aos="fade-up">
-            <h5><i class="fas fa-chart-area me-2"></i>TRAFFIC RISK OVERVIEW</h5>
+        <!-- Traffic Risk Overview - BAGIAN YANG DIPERBARUI -->
+        <div class="dashboard-card traffic-risk-card" data-aos="fade-up">
+            <h5>
+                <i class="fas fa-chart-area me-2"></i>
+                TRAFFIC RISK OVERVIEW
+                <div class="filter-info ms-2">
+                    <i class="fas fa-info-circle" data-bs-toggle="tooltip" title="Click on risk categories in the legend to filter data"></i>
+                </div>
+            </h5>
+
+            <!-- Enhanced Legend dengan label filter -->
+            <div class="enhanced-legend">
+                <span class="filter-label me-3">Filter by:</span>
+                <div class="legend-item high-risk-filter" id="highRiskFilter">
+                    <span class="legend-color" style="background-color: #dc3545;"></span>
+                    <span class="legend-text">High Risk</span>
+                    <i class="fas fa-filter filter-icon"></i>
+                </div>
+                <div class="legend-item medium-risk-filter" id="mediumRiskFilter">
+                    <span class="legend-color" style="background-color: #ffc107;"></span>
+                    <span class="legend-text">Medium Risk</span>
+                    <i class="fas fa-filter filter-icon"></i>
+                </div>
+                <div class="legend-item low-risk-filter" id="lowRiskFilter">
+                    <span class="legend-color" style="background-color: #28a745;"></span>
+                    <span class="legend-text">Low Risk</span>
+                    <i class="fas fa-filter filter-icon"></i>
+                </div>
+            </div>
+
             <div class="chart-container">
                 <canvas id="trafficRiskChart"></canvas>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="filter-status mt-3" id="filterStatus">
+                <span class="badge rounded-pill bg-light text-dark me-2 mb-2">All data shown</span>
+                <!-- Active filters will appear here -->
             </div>
         </div>
 
@@ -965,80 +1222,6 @@
                 }]
             },
             options: riskChartOptions
-        });
-
-        // Traffic Overview Chart
-        new Chart(document.getElementById('trafficChart'), {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Traffic',
-                    data: [1200, 1500, 1800, 2200, 2000, 2400],
-                    borderColor: '#003B7B',
-                    backgroundColor: 'rgba(0, 59, 123, 0.2)',
-                    fill: true,
-                    tension: 0.4,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#003B7B',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animations: {
-                    tension: {
-                        duration: 2000,
-                        easing: 'easeInOutQuart',
-                        from: 1,
-                        to: 0.4,
-                        loop: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.raw.toLocaleString()} Visitors`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                }
-            }
         });
 
         function fetchDetailData(category) {
@@ -1346,7 +1529,108 @@
             return date.toISOString().split('T')[0];
         }
 
-        // Traffic Risk Chart initialization
+        // Variable untuk melacak filter yang aktif
+        const activeFilters = {
+            highRisk: true,
+            mediumRisk: true,
+            lowRisk: true
+        };
+
+        // Fungsi untuk mengalihkan filter risiko
+        function toggleRiskFilter(riskType) {
+            console.log(`Toggling filter for: ${riskType}`); // Debug log
+
+            // Toggle status filter
+            activeFilters[riskType] = !activeFilters[riskType];
+
+            // Update indikasi visual
+            const filterElement = document.querySelector(`.${riskType.replace(/([A-Z])/g, '-$1').toLowerCase()}-filter`);
+            if (filterElement) {
+                if (activeFilters[riskType]) {
+                    filterElement.classList.add('active');
+                } else {
+                    filterElement.classList.remove('active');
+                }
+            }
+
+            // Update traffic chart dengan dataset yang sesuai
+            updateTrafficChartFilters();
+
+            // Update tampilan status filter
+            updateFilterStatus();
+        }
+
+        // Fungsi untuk memperbarui filter pada traffic chart
+        function updateTrafficChartFilters() {
+            const trafficChart = Chart.getChart('trafficRiskChart');
+            if (!trafficChart) {
+                console.error('Traffic chart not found!');
+                return;
+            }
+
+            // Update visibilitas dataset dalam chart
+            trafficChart.data.datasets.forEach((dataset, index) => {
+                if (dataset.label === 'High Risk') {
+                    dataset.hidden = !activeFilters.highRisk;
+                } else if (dataset.label === 'Medium Risk') {
+                    dataset.hidden = !activeFilters.mediumRisk;
+                } else if (dataset.label === 'Low Risk') {
+                    dataset.hidden = !activeFilters.lowRisk;
+                }
+            });
+
+            trafficChart.update();
+        }
+
+        // Fungsi untuk memperbarui tampilan status filter
+        function updateFilterStatus() {
+            const statusElement = document.getElementById('filterStatus');
+            if (!statusElement) return;
+
+            statusElement.innerHTML = '';
+
+            const activeFilterCount = Object.values(activeFilters).filter(v => v).length;
+
+            if (activeFilterCount === 3) {
+                // Semua filter aktif
+                statusElement.innerHTML = '<span class="badge rounded-pill bg-light text-dark me-2 mb-2">All data shown</span>';
+            } else {
+                // Tampilkan filter yang aktif
+                if (activeFilters.highRisk) {
+                    statusElement.innerHTML += '<span class="badge rounded-pill bg-danger text-white me-2 mb-2">High Risk</span>';
+                }
+                if (activeFilters.mediumRisk) {
+                    statusElement.innerHTML += '<span class="badge rounded-pill bg-warning text-dark me-2 mb-2">Medium Risk</span>';
+                }
+                if (activeFilters.lowRisk) {
+                    statusElement.innerHTML += '<span class="badge rounded-pill bg-success text-white me-2 mb-2">Low Risk</span>';
+                }
+
+                if (activeFilterCount === 0) {
+                    statusElement.innerHTML += '<span class="badge rounded-pill bg-secondary text-white me-2 mb-2">No filters active</span>';
+                }
+            }
+        }
+
+        // Fungsi untuk inisialisasi filter legend kustom
+        function initializeCustomLegendFilters() {
+            // Pastikan chart sudah ada
+            const trafficChart = Chart.getChart('trafficRiskChart');
+            if (!trafficChart) return;
+
+            // Setel status awal filter
+            Object.keys(activeFilters).forEach(filter => {
+                const filterElement = document.querySelector(`.${filter.replace(/([A-Z])/g, '-$1').toLowerCase()}-filter`);
+                if (filterElement) {
+                    filterElement.classList.add('active');
+                }
+            });
+
+            // Setel tampilan status awal
+            updateFilterStatus();
+        }
+
+        // Traffic Risk Chart initialization dengan penyesuaian baru
         async function initializeTrafficRiskChart() {
             try {
                 const ctx = document.getElementById('trafficRiskChart').getContext('2d');
@@ -1418,8 +1702,44 @@
                         plugins: {
                             tooltip: {
                                 mode: 'index',
-                                intersect: false
+                                intersect: false,
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        return `${tooltipItems[0].label} - Risk Analysis`;
+                                    },
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += context.parsed.y;
+                                        return label + ' alerts';
+                                    },
+                                    footer: function() {
+                                        return 'Click for detailed information';
+                                    }
+                                },
+                                padding: 10,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                footerFont: {
+                                    size: 12,
+                                    style: 'italic'
+                                }
+                            },
+                            legend: {
+                                display: false, // Sembunyikan legenda default
                             }
+                        },
+                        hover: {
+                            mode: 'index',
+                            intersect: false
                         },
                         onClick: async (e, elements) => {
                             if (elements.length > 0) {
@@ -1430,13 +1750,69 @@
                         },
                         scales: {
                             y: {
-                                beginAtZero: true
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    borderDash: [5, 5]
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    padding: 8
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Number of Alerts',
+                                    font: {
+                                        size: 13,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 10}
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    padding: 8
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Month',
+                                    font: {
+                                        size: 13,
+                                        weight: 'bold'
+                                    },
+                                    padding: {top: 10, bottom: 10}
+                                }
                             }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
                         }
                     }
                 });
+
+                // Setelah chart dibuat, inisialisasi filter custom
+                initializeCustomLegendFilters();
+
             } catch (error) {
                 console.error('Error initializing chart:', error);
+                const chartContainer = document.querySelector('.chart-container');
+                if (chartContainer) {
+                    chartContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Error loading chart data. Please try refreshing the page.
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -1567,6 +1943,43 @@
             AOS.init({
                 duration: 800,
                 once: true
+            });
+
+            // Initialize tooltips
+            const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltips.forEach(tooltip => {
+                new bootstrap.Tooltip(tooltip);
+            });
+
+            // Add click handlers for legend items directly
+            const legendItems = document.querySelectorAll('.legend-item');
+            legendItems.forEach(item => {
+                const classes = Array.from(item.classList);
+                const filterClass = classes.find(cls => cls.includes('-filter'));
+                if (filterClass) {
+                    const riskType = filterClass.replace('-filter', '').replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+
+                    // Ganti dengan element baru untuk menghindari event handler berganda
+                    const newItem = item.cloneNode(true);
+                    item.parentNode.replaceChild(newItem, item);
+
+                    // Tambahkan event listener baru
+                    newItem.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        console.log(`Legend clicked: ${riskType}`);
+
+                        let riskTypeFormatted;
+                        if (riskType === 'highRisk' || riskType === 'high-risk') {
+                            riskTypeFormatted = 'highRisk';
+                        } else if (riskType === 'mediumRisk' || riskType === 'medium-risk') {
+                            riskTypeFormatted = 'mediumRisk';
+                        } else {
+                            riskTypeFormatted = 'lowRisk';
+                        }
+
+                        toggleRiskFilter(riskTypeFormatted);
+                    });
+                }
             });
 
             // Initialize traffic risk chart
