@@ -325,24 +325,24 @@ class SophosApiService
     {
         try {
             $allAlerts = $this->getAllAlerts();
-            
+
             if (!is_array($allAlerts)) {
                 return []; // Return empty array instead of null
             }
-    
+
             // Normalize category and filter alerts
             $category = strtolower($category);
             if ($category === 'all risk') {
                 return array_values($allAlerts); // Ensure indexed array
             }
-    
+
             $severity = strtolower(str_replace(' risk', '', $category));
             $filteredAlerts = array_filter($allAlerts, function($alert) use ($severity) {
                 return strtolower($alert['severity'] ?? '') === $severity;
             });
-    
+
             return array_values($filteredAlerts); // Ensure indexed array
-    
+
         } catch (\Exception $e) {
             Log::error('Error in getAlertsByCategory:', [
                 'category' => $category,
@@ -372,9 +372,19 @@ class SophosApiService
                 'no_devices' => 0
             ];
 
+            // Log the raw response for debugging
+            Log::debug('Raw endpoints data:', ['count' => count($response['items'])]);
+
             foreach ($response['items'] as $endpoint) {
                 $lastSeen = $endpoint['lastSeenAt'] ?? null;
                 $status = $this->calculateUserStatus($lastSeen);
+
+                // Debug info
+                Log::debug('Processing endpoint:', [
+                    'hostname' => $endpoint['hostname'] ?? 'Unknown',
+                    'lastSeen' => $lastSeen,
+                    'status' => $status
+                ]);
 
                 $user = [
                     'name' => $endpoint['hostname'] ?? 'Unknown',
@@ -401,10 +411,15 @@ class SophosApiService
                         $stats['inactive_2months']++;
                         break;
                 }
+
+                // Increment no_devices if this endpoint has no device
+                if (empty($endpoint['id']) || $endpoint['id'] === '') {
+                    $stats['no_devices']++;
+                }
             }
 
-            // Calculate no_devices
-            $stats['no_devices'] = count($users) === 0 ? $stats['all'] : 0;
+            // Log the calculated stats
+            Log::info('Calculated stats:', $stats);
 
             return [
                 'users_list' => $users,

@@ -4,7 +4,7 @@
         <!-- Brand -->
         <a class="navbar-brand" href="{{route('dashboard')}}">
             <i class="fas fa-shield-alt"></i>
-            <span>Pertagas Sophos</span>
+            <span>SIPANDI</span>
         </a>
 
         <!-- Mobile Toggle -->
@@ -34,7 +34,6 @@
                         <span>Threat Analysis</span>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Current Threats</a></li>
                         <li><a class="dropdown-item" href="{{ route('reports')}}">Reports</a></li>
                     </ul>
                 </li>
@@ -82,7 +81,7 @@
 <style>
 /* Navbar Specific Styles */
 .navbar {
-    background-color: var(--primary-blue);
+    background-color: #1b258f;
     padding: 0.8rem 2rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\OverviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,33 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard & Main Navigation
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/overview', [DashboardController::class, 'overview'])->name('overview');
+
+Route::get('/debug-api', function() {
+    $sophosApi = app(\App\Services\SophosApiService::class);
+
+    echo "<h2>API Authentication Test</h2>";
+    echo "<pre>";
+
+    // Test Authentication
+    $reflection = new ReflectionMethod($sophosApi, 'authenticate');
+    $reflection->setAccessible(true);
+    $authResult = $reflection->invoke($sophosApi);
+    var_dump("Authentication result:", $authResult);
+
+    // Test API Call
+    echo "<h2>Endpoints Raw Data</h2>";
+    $reflection = new ReflectionMethod($sophosApi, 'makeApiRequest');
+    $reflection->setAccessible(true);
+    $endpoints = $reflection->invoke($sophosApi, '/endpoint/v1/endpoints');
+    var_dump("API Response Count:", $endpoints ? count($endpoints['items'] ?? []) : 0);
+
+    // Test getUsers method
+    echo "<h2>GetUsers Result</h2>";
+    $users = $sophosApi->getUsers();
+    var_dump("Users Stats:", $users ?? "No data");
+
+    return "Check the output above";
+});
     Route::get('/analytics', [DashboardController::class, 'analytics'])->name('analytics');
     Route::get('/reports', [DashboardController::class, 'reports'])->name('reports');
 
