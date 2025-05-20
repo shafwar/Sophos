@@ -42,6 +42,104 @@ class DashboardController extends Controller
         }
     }
 
+    public function overview()
+    {
+        Log::info('Start overview method');
+        try {
+            // FORCE DUMMY DATA untuk development - HAPUS saat produksi
+            $useDummyData = true;
+
+            if ($useDummyData) {
+                Log::info('Using forced dummy data');
+                $usersData = [
+                    'users_list' => [
+                        ['name' => 'DESKTOP-3J5K2LM', 'email' => 'user1@example.com', 'last_online' => '3 days ago', 'devices' => '1', 'logins' => 'User1', 'groups' => 'Group A', 'health_status' => 'good'],
+                        ['name' => 'DESKPC-HR125', 'email' => 'user2@example.com', 'last_online' => 'Jan 25, 2025', 'devices' => '1', 'logins' => 'User2', 'groups' => 'Group B', 'health_status' => 'warning'],
+                        ['name' => 'LAPTOP-RT7X', 'email' => 'user3@example.com', 'last_online' => '1 day ago', 'devices' => '1', 'logins' => 'User3', 'groups' => 'Group C', 'health_status' => 'good'],
+                        ['name' => 'DESKTOP-NODEV', 'email' => 'user4@example.com', 'last_online' => 'Never', 'devices' => '', 'logins' => 'User4', 'groups' => 'Group A', 'health_status' => 'warning']
+                    ],
+                    'all' => 50,
+                    'active' => 45,
+                    'inactive_2weeks' => 3,
+                    'inactive_2months' => 1,
+                    'no_devices' => 1
+                ];
+            } else {
+                Log::info('Trying to get data from Sophos API');
+                $usersData = $this->sophosApi->getUsers();
+
+                if (!$usersData) {
+                    throw new \Exception('Tidak dapat mengambil data dari Sophos API');
+                }
+            }
+
+            $userGroups = [];
+            foreach ($usersData['users_list'] as $user) {
+                if (is_array($user['groups'])) {
+                    foreach ($user['groups'] as $group) {
+                        if (!in_array($group, $userGroups)) {
+                            $userGroups[] = $group;
+                        }
+                    }
+                } else if (!empty($user['groups']) && !in_array($user['groups'], $userGroups)) {
+                    $userGroups[] = $user['groups'];
+                }
+            }
+
+            Log::info('Returning view with data', [
+                'stats' => [
+                    'all' => $usersData['all'],
+                    'active' => $usersData['active'],
+                    'inactive_2weeks' => $usersData['inactive_2weeks'],
+                    'inactive_2months' => $usersData['inactive_2months'],
+                    'no_devices' => $usersData['no_devices']
+                ]
+            ]);
+
+            return view('overview', [
+                'users' => $usersData['users_list'],
+                'stats' => [
+                    'all' => $usersData['all'],
+                    'active' => $usersData['active'],
+                    'inactive_2weeks' => $usersData['inactive_2weeks'],
+                    'inactive_2months' => $usersData['inactive_2months'],
+                    'no_devices' => $usersData['no_devices']
+                ],
+                'userGroups' => $userGroups
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error pada DashboardController@overview: ' . $e->getMessage());
+
+            // Fallback data jika terjadi error
+            $usersData = [
+                'users_list' => [
+                    ['name' => 'DESKTOP-3J5K2LM', 'email' => 'user1@example.com', 'last_online' => '3 days ago', 'devices' => '1', 'logins' => 'User1', 'groups' => 'Group A', 'health_status' => 'good'],
+                    ['name' => 'DESKPC-HR125', 'email' => 'user2@example.com', 'last_online' => 'Jan 25, 2025', 'devices' => '1', 'logins' => 'User2', 'groups' => 'Group B', 'health_status' => 'warning'],
+                    ['name' => 'DESKTOP-NODEV', 'email' => 'user4@example.com', 'last_online' => 'Never', 'devices' => '', 'logins' => 'User4', 'groups' => 'Group A', 'health_status' => 'warning']
+                ],
+                'all' => 50,
+                'active' => 45,
+                'inactive_2weeks' => 3,
+                'inactive_2months' => 1,
+                'no_devices' => 1
+            ];
+
+            $userGroups = ['Group A', 'Group B'];
+
+            return view('overview', [
+                'users' => $usersData['users_list'],
+                'stats' => [
+                    'all' => $usersData['all'],
+                    'active' => $usersData['active'],
+                    'inactive_2weeks' => $usersData['inactive_2weeks'],
+                    'inactive_2months' => $usersData['inactive_2months'],
+                    'no_devices' => $usersData['no_devices']
+                ],
+                'userGroups' => $userGroups
+            ]);
+        }
+    }
+
     public function analytics()
     {
         try {
@@ -169,40 +267,39 @@ class DashboardController extends Controller
         ];
     }
 
-public function getAlertsByCategory($category)
-{
-    try {
-        Log::info('Getting alerts for category: ' . $category);
+    public function getAlertsByCategory($category)
+    {
+        try {
+            Log::info('Getting alerts for category: ' . $category);
 
-        $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
-            return $this->sophosApi->getAlertsByCategory($category);
-        });
+            $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
+                return $this->sophosApi->getAlertsByCategory($category);
+            });
 
-        // Ensure we always return an array
-        $alerts = is_array($alerts) ? $alerts : [];
+            // Ensure we always return an array
+            $alerts = is_array($alerts) ? $alerts : [];
 
-        return response()->json([
-            'success' => true,
-            'data' => $alerts,
-            'category' => $category,
-            'total' => count($alerts)
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $alerts,
+                'category' => $category,
+                'total' => count($alerts)
+            ]);
 
-    } catch (\Exception $e) {
-        Log::error('Error in getAlertsByCategory:', [
-            'category' => $category,
-            'message' => $e->getMessage()
-        ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getAlertsByCategory:', [
+                'category' => $category,
+                'message' => $e->getMessage()
+            ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while fetching the data.',
-            'data' => [],
-            'category' => $category
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching the data.',
+                'data' => [],
+                'category' => $category
+            ], 500);
+        }
     }
-}
-
 
     public function getMetrics()
     {
@@ -222,117 +319,116 @@ public function getAlertsByCategory($category)
     }
 
     public function getWeeklyTrafficRisk()
-{
-    try {
-        $sophosService = app(SophosApiService::class);
-        $alerts = $sophosService->getAllAlerts();
+    {
+        try {
+            $sophosService = app(SophosApiService::class);
+            $alerts = $sophosService->getAllAlerts();
 
-        Log::info('Alerts received:', ['count' => count($alerts)]);
+            Log::info('Alerts received:', ['count' => count($alerts)]);
 
-        // Group alerts by month and risk level
-        $monthlyData = collect($alerts)->groupBy(function ($alert) {
-            return Carbon::parse($alert['raisedAt'])->format('M');
-        })->map(function ($monthAlerts) {
-            return [
-                'highRisk' => $monthAlerts->where('severity', 'high')->count(),
-                'mediumRisk' => $monthAlerts->where('severity', 'medium')->count(),
-                'lowRisk' => $monthAlerts->where('severity', 'low')->count(),
-            ];
-        });
+            // Group alerts by month and risk level
+            $monthlyData = collect($alerts)->groupBy(function ($alert) {
+                return Carbon::parse($alert['raisedAt'])->format('M');
+            })->map(function ($monthAlerts) {
+                return [
+                    'highRisk' => $monthAlerts->where('severity', 'high')->count(),
+                    'mediumRisk' => $monthAlerts->where('severity', 'medium')->count(),
+                    'lowRisk' => $monthAlerts->where('severity', 'low')->count(),
+                ];
+            });
 
+            // Transform into the format needed for the chart
+            $chartData = $monthlyData->map(function ($risks, $month) {
+                return array_merge(['month' => $month], $risks);
+            })->values();
 
-
-        // Transform into the format needed for the chart
-        $chartData = $monthlyData->map(function ($risks, $month) {
-            return array_merge(['month' => $month], $risks);
-        })->values();
-
-        return response()->json([
-            'success' => true,
-            'data' => $chartData
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error fetching traffic risk data: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to fetch traffic risk data'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'data' => $chartData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching traffic risk data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch traffic risk data'
+            ], 500);
+        }
     }
-}
 
-public function getTrafficRiskDetails($month, $level)
-{
-    try {
-        $sophosService = app(SophosApiService::class);
-        $alerts = $sophosService->getAllAlerts();
+    public function getTrafficRiskDetails($month, $level)
+    {
+        try {
+            $sophosService = app(SophosApiService::class);
+            $alerts = $sophosService->getAllAlerts();
 
-        // Filter alerts by month and risk level
-        $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level) {
-            return Carbon::parse($alert['raisedAt'])->format('M') === $month
-                && strtolower($alert['severity']) === strtolower($level);
-        })->map(function ($alert) {
-            return [
-                'id' => $alert['id'],
-                'category' => $alert['category'],
-                'description' => $alert['description'],
-                'date' => $alert['raisedAt'],
-                'device' => $alert['endpoint_id'] ?? 'Unknown Device',
-                'source' => $alert['source'] ?? 'Unknown Source',
-                'location' => $alert['location'] ?? 'Unknown Location'
-            ];
-        })->values();
+            // Filter alerts by month and risk level
+            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level) {
+                return Carbon::parse($alert['raisedAt'])->format('M') === $month
+                    && strtolower($alert['severity']) === strtolower($level);
+            })->map(function ($alert) {
+                return [
+                    'id' => $alert['id'],
+                    'category' => $alert['category'],
+                    'description' => $alert['description'],
+                    'date' => $alert['raisedAt'],
+                    'device' => $alert['endpoint_id'] ?? 'Unknown Device',
+                    'source' => $alert['source'] ?? 'Unknown Source',
+                    'location' => $alert['location'] ?? 'Unknown Location'
+                ];
+            })->values();
 
-        return response()->json([
-            'success' => true,
-            'month' => $month,
-            'riskLevel' => $level,
-            'incidents' => $filteredAlerts
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error fetching traffic risk details: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to fetch risk details'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'month' => $month,
+                'riskLevel' => $level,
+                'incidents' => $filteredAlerts
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching traffic risk details: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch risk details'
+            ], 500);
+        }
     }
-}
 
-public function getMonthlyDetails($month)
-{
-    try {
-        $alerts = $this->sophosApi->getAllAlerts();
+    public function getMonthlyDetails($month)
+    {
+        try {
+            $alerts = $this->sophosApi->getAllAlerts();
 
-        // Filter alerts untuk bulan yang dipilih
-        $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month) {
-            return Carbon::parse($alert['raisedAt'])->format('M') === $month;
-        })->map(function ($alert) {
-            return [
-                'id' => $alert['id'],
-                'category' => $alert['category'],
-                'description' => $alert['description'],
-                'severity' => $alert['severity'],
-                'date' => $alert['raisedAt'],
-                'source' => $alert['source'] ?? null,
-                'location' => $alert['location'] ?? null,
-                'endpoint_type' => $alert['endpoint_type'] ?? null,
-                'endpoint_id' => $alert['endpoint_id'] ?? null
-            ];
-        })->values();
+            // Filter alerts untuk bulan yang dipilih
+            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month) {
+                return Carbon::parse($alert['raisedAt'])->format('M') === $month;
+            })->map(function ($alert) {
+                return [
+                    'id' => $alert['id'],
+                    'category' => $alert['category'],
+                    'description' => $alert['description'],
+                    'severity' => $alert['severity'],
+                    'date' => $alert['raisedAt'],
+                    'source' => $alert['source'] ?? null,
+                    'location' => $alert['location'] ?? null,
+                    'endpoint_type' => $alert['endpoint_type'] ?? null,
+                    'endpoint_id' => $alert['endpoint_id'] ?? null
+                ];
+            })->values();
 
-        return response()->json([
-            'success' => true,
-            'month' => $month,
-            'incidents' => $filteredAlerts
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error fetching monthly details: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to fetch monthly details'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'month' => $month,
+                'incidents' => $filteredAlerts
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching monthly details: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch monthly details'
+            ], 500);
+        }
     }
-}
-    public function overview()
+
+    public function metricsOverview()
     {
         try {
             // Dapatkan metrics dari Sophos API dan cache selama 5 menit
@@ -394,13 +490,13 @@ public function getMonthlyDetails($month)
                 'pageTitle' => 'Overview'
             ];
 
-            return view('overview', $data);
+            return view('metrics_overview', $data); // Ubah view juga
 
         } catch (\Exception $e) {
-            Log::error('Error in overview:', ['message' => $e->getMessage()]);
+            Log::error('Error in metricsOverview:', ['message' => $e->getMessage()]);
 
             // Return view dengan data default jika terjadi error
-            return view('overview', [
+            return view('metrics_overview', [
                 'metrics' => $this->getDefaultMetrics(),
                 'workToBill' => 0,
                 'quotedWork' => 0,
@@ -410,7 +506,7 @@ public function getMonthlyDetails($month)
                 'winPercentage' => 0,
                 'receivables' => collect([]),
                 'activeJobs' => collect([]),
-                'pageTitle' => 'Overview'
+                'pageTitle' => 'Metrics Overview'
             ]);
         }
     }
@@ -457,5 +553,3 @@ public function getMonthlyDetails($month)
         return view('reports', compact('stats', 'computers', 'computerGroups'));
     }
 }
-
-

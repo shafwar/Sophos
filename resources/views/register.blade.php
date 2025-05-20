@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - PeSo (Sophos)</title>
+    <title>Register - SIPANDI</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -309,7 +309,7 @@
             .orb {
                 opacity: 0.2;
             }
-        }   
+        }
         /* Tambahan style untuk form register */
         .error-message {
             color: #ff4444;
@@ -339,19 +339,19 @@
     <div class="main-container">
         <div class="login-container">
             <div class="welcome-text">
-                <h2>PERTAGAS SOPHOS</h2>
+                <h2>SIPANDI</h2>
                 <p>Buat akun baru</p>
             </div>
 
             <form method="POST" action="{{ route('register') }}" id="registerForm">
                 @csrf
-                
+
                 <div class="form-group">
-                    <input type="text" 
-                           name="name" 
-                           class="form-input @error('name') is-invalid @enderror" 
-                           placeholder="Full Name" 
-                           value="{{ old('name') }}" 
+                    <input type="text"
+                           name="name"
+                           class="form-input @error('name') is-invalid @enderror"
+                           placeholder="Full Name"
+                           value="{{ old('name') }}"
                            required>
                     @error('name')
                         <div class="error-message">{{ $message }}</div>
@@ -359,11 +359,11 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="email" 
-                           name="email" 
-                           class="form-input @error('email') is-invalid @enderror" 
-                           placeholder="Email" 
-                           value="{{ old('email') }}" 
+                    <input type="email"
+                           name="email"
+                           class="form-input @error('email') is-invalid @enderror"
+                           placeholder="Email"
+                           value="{{ old('email') }}"
                            required>
                     @error('email')
                         <div class="error-message">{{ $message }}</div>
@@ -371,10 +371,10 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="password" 
-                           name="password" 
-                           class="form-input @error('password') is-invalid @enderror" 
-                           placeholder="Password" 
+                    <input type="password"
+                           name="password"
+                           class="form-input @error('password') is-invalid @enderror"
+                           placeholder="Password"
                            required>
                     @error('password')
                         <div class="error-message">{{ $message }}</div>
@@ -382,10 +382,10 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="password" 
-                           name="password_confirmation" 
-                           class="form-input" 
-                           placeholder="Confirm Password" 
+                    <input type="password"
+                           name="password_confirmation"
+                           class="form-input"
+                           placeholder="Confirm Password"
                            required>
                 </div>
 
@@ -395,9 +395,9 @@
 
                 <div class="text-center" style="margin-top: 2rem;">
                     <p style="color: rgba(255, 255, 255, 0.7);">
-                        Sudah punya akun? 
-                        <a href="{{ route('login') }}" 
-                           style="color: #3b82f6; text-decoration: none; 
+                        Sudah punya akun?
+                        <a href="{{ route('login') }}"
+                           style="color: #3b82f6; text-decoration: none;
                                   transition: all 0.3s ease;">
                             Login disini
                         </a>

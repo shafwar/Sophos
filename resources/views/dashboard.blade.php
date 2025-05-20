@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard - PeSo (Pertagas Sophos)</title>
+    <title>Dashboard - SIPANDI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -774,7 +774,7 @@
             <!-- Brand -->
             <a class="navbar-brand" href="#">
                 <i class="fas fa-shield-alt"></i>
-                <span>Pertagas Sophos</span>
+                <span>SIPANDI</span>
             </a>
 
             <!-- Mobile Toggle -->
@@ -804,7 +804,6 @@
                             <span>Threat Analysis</span>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Current Threats</a></li>
                             <li><a class="dropdown-item" href="{{ route('reports')}}">Reports</a></li>
                         </ul>
                     </li>
@@ -856,9 +855,9 @@
         </div>
     </nav>
 
-        <!-- Sophos Central Dashboard Header -->
+        <!-- SiPandi Central Dashboard Header -->
     <div class="container-fluid px-4 py-3 mt-4" style="background: white; border-bottom: 1px solid #e5e7eb;">
-        <h2 class="mb-1" style="color: #1b258f; font-size: 1.75rem; font-weight: 600;">Sophos Central Dashboard</h2>
+        <h2 class="mb-1" style="color: #1b258f; font-size: 1.75rem; font-weight: 600;">SIPANDI Central Dashboard</h2>
         <p class="text-muted mb-0" style="font-size: 0.95rem;">See a snapshot of your security protection</p>
     </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PeSo (Sophos)</title>
+    <title>Login - SIPANDI</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -325,31 +325,31 @@
     <div class="main-container">
         <div class="login-container">
             <div class="welcome-text">
-                <h2>PERTAGAS SOPHOS</h2>
+                <h2>SIPANDI</h2>
                 <p>Silahkan login terlebih dahulu</p>
             </div>
-        
+
             <form method="POST" action="{{ route('login.submit') }}" id="loginForm">
                 @csrf
                 <div class="form-group">
                     <input type="email" name="email" class="form-input" placeholder="Email" value="{{ old('email') }}" required>
                 </div>
-        
+
                 <div class="form-group">
                     <input type="password" name="password" class="form-input" placeholder="Password" required>
                 </div>
-        
+
                 <div class="forgot-password">
                     <a href="{{ route('password.request') }}">Lupa Password?</a>
                 </div>
-        
+
                 <button type="submit" class="login-button">
                     LOGIN
                 </button>
-        
+
                 <div class="text-center mt-4">
                     <p style="color: rgba(255, 255, 255, 0.7);">
-                        Belum punya akun? 
+                        Belum punya akun?
                         <a href="{{ route('register') }}" style="color: #3b82f6; text-decoration: none;">Register</a>
                     </p>
                 </div>

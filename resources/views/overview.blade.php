@@ -270,25 +270,25 @@
     <div class="metrics-grid">
         <div class="metric-card" data-aos="fade-up" data-aos-delay="100">
             <div class="metric-title">Active Endpoints</div>
-            <div class="metric-value">599</div>
+            <div class="metric-value">{{ $stats['active'] ?? 0 }}</div>
             <div class="metric-subtitle">PROTECTED</div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="200">
             <div class="metric-title">Inactive Endpoints</div>
-            <div class="metric-value">37</div>
+            <div class="metric-value">{{ $stats['inactive_2weeks'] ?? 0 }}</div>
             <div class="metric-subtitle">2+ WEEKS</div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="300">
             <div class="metric-title">Inactive Endpoints</div>
-            <div class="metric-value">0</div>
+            <div class="metric-value">{{ $stats['inactive_2months'] ?? 0 }}</div>
             <div class="metric-subtitle">2+ MONTHS</div>
         </div>
 
         <div class="metric-card" data-aos="fade-up" data-aos-delay="400">
             <div class="metric-title">Not Protected</div>
-            <div class="metric-value">4</div>
+            <div class="metric-value">{{ $stats['no_devices'] ?? 0 }}</div>
             <div class="metric-subtitle">ENDPOINTS</div>
         </div>
     </div>
@@ -321,7 +321,9 @@
             <div style="height: 300px; position: relative;">
                 <canvas id="protectionRateChart"></canvas>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                    <div style="font-size: 2.5rem; font-weight: bold;">99.4%</div>
+                    <div style="font-size: 2.5rem; font-weight: bold;">
+                        {{ $stats['all'] > 0 ? number_format(($stats['active'] / $stats['all']) * 100, 1) : 0 }}%
+                    </div>
                     <div style="opacity: 0.8;">Protected</div>
                 </div>
             </div>
@@ -343,23 +345,31 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>DESKTOP-3J5K2LM</td>
-                            <td>192.168.1.105</td>
-                            <td>3 days ago</td>
-                            <td>
-                                <button class="action-button" title="Protect">
-                                    <i class="fas fa-shield-alt"></i>
-                                </button>
-                                <button class="action-button" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        @forelse($users as $user)
+                            @if($user['devices'] == '' || $user['devices'] == 'None')
+                            <tr>
+                                <td>{{ $user['name'] }}</td>
+                                <td>{{ $user['email'] != 'N/A' ? $user['email'] : '-' }}</td>
+                                <td>{{ $user['last_online'] }}</td>
+                                <td>
+                                    <button class="action-button" title="Protect">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </button>
+                                    <button class="action-button" title="Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @endif
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center">No unprotected endpoints found</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="table-total">
-                    Total Unprotected: 4
+                    Total Unprotected: {{ $stats['no_devices'] ?? 0 }}
                 </div>
             </div>
         </div>
@@ -378,26 +388,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>DESKPC-HR125</td>
-                            <td>192.168.1.45</td>
-                            <td>
-                                <span class="status-badge">2+ Weeks</span>
-                            </td>
-                            <td>Jan 25, 2025</td>
-                            <td>
-                                <button class="action-button" title="Check">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                                <button class="action-button" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        @forelse($users as $user)
+                            @if(strtotime($user['last_online']) < strtotime('-2 weeks') && $user['last_online'] != 'Never')
+                            <tr>
+                                <td>{{ $user['name'] }}</td>
+                                <td>{{ $user['email'] != 'N/A' ? $user['email'] : '-' }}</td>
+                                <td>
+                                    <span class="status-badge">{{ strtotime($user['last_online']) < strtotime('-2 months') ? '2+ Months' : '2+ Weeks' }}</span>
+                                </td>
+                                <td>{{ $user['last_online'] }}</td>
+                                <td>
+                                    <button class="action-button" title="Check">
+                                        <i class="fas fa-sync"></i>
+                                    </button>
+                                    <button class="action-button" title="Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @endif
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center">No inactive endpoints found</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="table-total">
-                    Total Inactive: 37
+                    Total Inactive: {{ ($stats['inactive_2weeks'] ?? 0) + ($stats['inactive_2months'] ?? 0) }}
                 </div>
             </div>
         </div>
@@ -469,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
             labels: ['Active', 'Inactive 2+ Weeks', 'Inactive 2+ Months', 'Not Protected'],
             datasets: [{
                 label: 'Endpoints',
-                data: [599, 37, 0, 4],
+                data: [{{ $stats['active'] ?? 0 }}, {{ $stats['inactive_2weeks'] ?? 0 }}, {{ $stats['inactive_2months'] ?? 0 }}, {{ $stats['no_devices'] ?? 0 }}],
                 backgroundColor: [
                     chartColors.primary,
                     chartColors.secondary,
@@ -499,12 +517,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Protection Rate Chart
     const protectionRateCtx = document.getElementById('protectionRateChart').getContext('2d');
+    const totalEndpoints = {{ $stats['all'] ?? 0 }};
+    const protectedEndpoints = {{ $stats['active'] ?? 0 }};
+    const protectionRate = totalEndpoints > 0 ? ((protectedEndpoints / totalEndpoints) * 100).toFixed(1) : 0;
+    const remainingRate = (100 - protectionRate).toFixed(1);
+
     new Chart(protectionRateCtx, {
         type: 'doughnut',
         data: {
             labels: ['Protected', 'Not Protected'],
             datasets: [{
-                data: [99.4, 0.6],
+                data: [protectionRate, remainingRate],
                 backgroundColor: [
                     chartColors.primary,
                     chartColors.danger
@@ -552,14 +575,29 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCharts() {
         const endpointStatusChart = Chart.getChart('endpointStatusChart');
         if (endpointStatusChart) {
-            endpointStatusChart.data.datasets[0].data = [599, 37, 0, 4];
+            endpointStatusChart.data.datasets[0].data = [
+                {{ $stats['active'] ?? 0 }},
+                {{ $stats['inactive_2weeks'] ?? 0 }},
+                {{ $stats['inactive_2months'] ?? 0 }},
+                {{ $stats['no_devices'] ?? 0 }}
+            ];
             endpointStatusChart.update();
         }
 
         const protectionRateChart = Chart.getChart('protectionRateChart');
         if (protectionRateChart) {
-            protectionRateChart.data.datasets[0].data = [99.4, 0.6];
+            const totalEndpoints = {{ $stats['all'] ?? 0 }};
+            const protectedEndpoints = {{ $stats['active'] ?? 0 }};
+            const protectionRate = totalEndpoints > 0 ? ((protectedEndpoints / totalEndpoints) * 100).toFixed(1) : 0;
+
+            protectionRateChart.data.datasets[0].data = [protectionRate, (100 - protectionRate).toFixed(1)];
             protectionRateChart.update();
+
+            // Update center text
+            const centerText = document.querySelector('.chart-card:nth-child(2) .chart-container > div > div');
+            if (centerText) {
+                centerText.textContent = protectionRate + '%';
+            }
         }
     }
 
@@ -781,18 +819,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateChartData(chartType, timeframe) {
         const loadingOverlay = showLoading(chartType);
 
+        // Gunakan data dummy yang dinamis (dalam kenyataan, ini akan mengambil dari API)
         const data = {
             'Current': {
-                endpointStatus: [599, 37, 0, 4],
-                protectionRate: [99.4, 0.6]
+                endpointStatus: [{{ $stats['active'] ?? 0 }}, {{ $stats['inactive_2weeks'] ?? 0 }}, {{ $stats['inactive_2months'] ?? 0 }}, {{ $stats['no_devices'] ?? 0 }}],
+                protectionRate: [{{ $stats['all'] > 0 ? number_format(($stats['active'] / $stats['all']) * 100, 1) : 0 }}, {{ $stats['all'] > 0 ? number_format(100 - (($stats['active'] / $stats['all']) * 100), 1) : 0 }}]
             },
             'Last Week': {
-                endpointStatus: [585, 42, 2, 11],
-                protectionRate: [98.2, 1.8]
+                endpointStatus: [42, 5, 2, 1],
+                protectionRate: [84.0, 16.0]
             },
             'Last Month': {
-                endpointStatus: [572, 39, 5, 16],
-                protectionRate: [97.3, 2.7]
+                endpointStatus: [38, 8, 3, 1],
+                protectionRate: [76.0, 24.0]
             }
         };
 
