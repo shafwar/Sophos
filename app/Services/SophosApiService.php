@@ -358,6 +358,9 @@ class SophosApiService
             // Get endpoints data using makeApiRequest
             $response = $this->makeApiRequest('/endpoint/v1/endpoints');
 
+            // Tambahkan log untuk response mentah dari API
+            \Log::debug('Sophos API raw response:', ['response' => $response]);
+
             if (!$response || !isset($response['items'])) {
                 Log::error('Failed to get endpoints data or invalid response format');
                 return null;
@@ -379,8 +382,8 @@ class SophosApiService
                 $lastSeen = $endpoint['lastSeenAt'] ?? null;
                 $status = $this->calculateUserStatus($lastSeen);
 
-                // Debug info
-                Log::debug('Processing endpoint:', [
+                // Debug info per endpoint
+                Log::debug('Endpoint status:', [
                     'hostname' => $endpoint['hostname'] ?? 'Unknown',
                     'lastSeen' => $lastSeen,
                     'status' => $status
@@ -418,8 +421,8 @@ class SophosApiService
                 }
             }
 
-            // Log the calculated stats
-            Log::info('Calculated stats:', $stats);
+            // Log the calculated stats and users
+            Log::debug('Parsed users:', ['users' => $users, 'stats' => $stats]);
 
             return [
                 'users_list' => $users,
@@ -445,11 +448,24 @@ class SophosApiService
             return 'inactive_2months';
         }
 
-        $lastSeenDate = strtotime($lastSeen);
-        $twoWeeksAgo = strtotime('-2 weeks');
+        try {
+            $lastSeenDate = \Carbon\Carbon::parse($lastSeen)->timestamp;
+        } catch (\Exception $e) {
+            \Log::error('Error parsing lastSeen date', ['lastSeen' => $lastSeen, 'error' => $e->getMessage()]);
+            return 'inactive_2months';
+        }
+        $oneDayAgo = strtotime('-1 day');
         $twoMonthsAgo = strtotime('-2 months');
 
-        if ($lastSeenDate > $twoWeeksAgo) {
+        // Log debug untuk memastikan nilai
+        \Log::debug('Check inactive status', [
+            'lastSeen' => $lastSeen,
+            'lastSeenDate' => $lastSeenDate,
+            'oneDayAgo' => $oneDayAgo,
+            'twoMonthsAgo' => $twoMonthsAgo,
+        ]);
+
+        if ($lastSeenDate > $oneDayAgo) {
             return 'active';
         } elseif ($lastSeenDate > $twoMonthsAgo) {
             return 'inactive_2weeks';
