@@ -44,33 +44,11 @@ class DashboardController extends Controller
 
     public function overview()
     {
-        Log::info('Start overview method');
         try {
-            // FORCE DUMMY DATA untuk development - HAPUS saat produksi
-            $useDummyData = true;
+            $usersData = $this->sophosApi->getUsers();
 
-            if ($useDummyData) {
-                Log::info('Using forced dummy data');
-                $usersData = [
-                    'users_list' => [
-                        ['name' => 'DESKTOP-3J5K2LM', 'email' => 'user1@example.com', 'last_online' => '3 days ago', 'devices' => '1', 'logins' => 'User1', 'groups' => 'Group A', 'health_status' => 'good'],
-                        ['name' => 'DESKPC-HR125', 'email' => 'user2@example.com', 'last_online' => 'Jan 25, 2025', 'devices' => '1', 'logins' => 'User2', 'groups' => 'Group B', 'health_status' => 'warning'],
-                        ['name' => 'LAPTOP-RT7X', 'email' => 'user3@example.com', 'last_online' => '1 day ago', 'devices' => '1', 'logins' => 'User3', 'groups' => 'Group C', 'health_status' => 'good'],
-                        ['name' => 'DESKTOP-NODEV', 'email' => 'user4@example.com', 'last_online' => 'Never', 'devices' => '', 'logins' => 'User4', 'groups' => 'Group A', 'health_status' => 'warning']
-                    ],
-                    'all' => 50,
-                    'active' => 45,
-                    'inactive_2weeks' => 3,
-                    'inactive_2months' => 1,
-                    'no_devices' => 1
-                ];
-            } else {
-                Log::info('Trying to get data from Sophos API');
-                $usersData = $this->sophosApi->getUsers();
-
-                if (!$usersData) {
-                    throw new \Exception('Tidak dapat mengambil data dari Sophos API');
-                }
+            if (!$usersData) {
+                throw new \Exception('Tidak dapat mengambil data dari Sophos API');
             }
 
             $userGroups = [];
@@ -86,16 +64,6 @@ class DashboardController extends Controller
                 }
             }
 
-            Log::info('Returning view with data', [
-                'stats' => [
-                    'all' => $usersData['all'],
-                    'active' => $usersData['active'],
-                    'inactive_2weeks' => $usersData['inactive_2weeks'],
-                    'inactive_2months' => $usersData['inactive_2months'],
-                    'no_devices' => $usersData['no_devices']
-                ]
-            ]);
-
             return view('overview', [
                 'users' => $usersData['users_list'],
                 'stats' => [
@@ -109,33 +77,16 @@ class DashboardController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error pada DashboardController@overview: ' . $e->getMessage());
-
-            // Fallback data jika terjadi error
-            $usersData = [
-                'users_list' => [
-                    ['name' => 'DESKTOP-3J5K2LM', 'email' => 'user1@example.com', 'last_online' => '3 days ago', 'devices' => '1', 'logins' => 'User1', 'groups' => 'Group A', 'health_status' => 'good'],
-                    ['name' => 'DESKPC-HR125', 'email' => 'user2@example.com', 'last_online' => 'Jan 25, 2025', 'devices' => '1', 'logins' => 'User2', 'groups' => 'Group B', 'health_status' => 'warning'],
-                    ['name' => 'DESKTOP-NODEV', 'email' => 'user4@example.com', 'last_online' => 'Never', 'devices' => '', 'logins' => 'User4', 'groups' => 'Group A', 'health_status' => 'warning']
-                ],
-                'all' => 50,
-                'active' => 45,
-                'inactive_2weeks' => 3,
-                'inactive_2months' => 1,
-                'no_devices' => 1
-            ];
-
-            $userGroups = ['Group A', 'Group B'];
-
             return view('overview', [
-                'users' => $usersData['users_list'],
+                'users' => [],
                 'stats' => [
-                    'all' => $usersData['all'],
-                    'active' => $usersData['active'],
-                    'inactive_2weeks' => $usersData['inactive_2weeks'],
-                    'inactive_2months' => $usersData['inactive_2months'],
-                    'no_devices' => $usersData['no_devices']
+                    'all' => 0,
+                    'active' => 0,
+                    'inactive_2weeks' => 0,
+                    'inactive_2months' => 0,
+                    'no_devices' => 0
                 ],
-                'userGroups' => $userGroups
+                'userGroups' => []
             ]);
         }
     }
@@ -326,6 +277,9 @@ class DashboardController extends Controller
 
             Log::info('Alerts received:', ['count' => count($alerts)]);
 
+            // Daftar bulan Jan–Des
+            $allMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
             // Group alerts by month and risk level
             $monthlyData = collect($alerts)->groupBy(function ($alert) {
                 return Carbon::parse($alert['raisedAt'])->format('M');
@@ -337,10 +291,14 @@ class DashboardController extends Controller
                 ];
             });
 
-            // Transform into the format needed for the chart
-            $chartData = $monthlyData->map(function ($risks, $month) {
-                return array_merge(['month' => $month], $risks);
-            })->values();
+            // Pastikan semua bulan ada, meski 0
+            $chartData = [];
+            foreach ($allMonths as $month) {
+                $chartData[] = array_merge(
+                    ['month' => $month],
+                    $monthlyData->get($month, ['highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0])
+                );
+            }
 
             return response()->json([
                 'success' => true,
@@ -513,43 +471,50 @@ class DashboardController extends Controller
 
     public function reports()
     {
-        $stats = [
-            'all' => 640,
-            'active' => 599,
-            'inactive_2weeks' => 37,
-            'inactive_2months' => 0,
-            'not_protected' => 4
-        ];
+        try {
+            $computersData = $this->sophosApi->getComputers();
 
-        // Buat data computers sebagai array biasa
-        $computersData = [
-            [
-                'name' => '604020000879',
-                'online' => '10 minutes ago',
-                'last_user' => '604020000879\Rino',
-                'real_time_scan' => 'Yes',
-                'last_update' => '6 hours ago',
-                'last_scan' => 'Never',
-                'health_status' => 'warning',
-                'group' => 'EJA',
-                'agent_installed' => 'Yes'
-            ]
-        ];
+            // Pastikan data valid
+            $computers = collect($computersData['computers_list'] ?? []);
+            $stats = $computersData['stats'] ?? [
+                'all' => 0,
+                'active' => 0,
+                'inactive_2weeks' => 0,
+                'inactive_2months' => 0,
+                'not_protected' => 0
+            ];
+            $computerGroups = $computers->pluck('group')->unique()->values()->all();
 
-        // Gunakan LengthAwarePaginator untuk membuat pagination manual
-        $currentPage = request()->get('page', 1);
-        $perPage = 15;
+            // Pagination
+            $currentPage = request()->get('page', 1);
+            $perPage = 15;
+            $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+                $computers->forPage($currentPage, $perPage),
+                $computers->count(),
+                $perPage,
+                $currentPage,
+                ['path' => request()->url()]
+            );
 
-        $computers = new \Illuminate\Pagination\LengthAwarePaginator(
-            collect($computersData),
-            count($computersData),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url()]
-        );
-
-        $computerGroups = ['EJA'];
-
-        return view('reports', compact('stats', 'computers', 'computerGroups'));
+            return view('reports', [
+                'stats' => $stats,
+                'computers' => $paginated,
+                'computerGroups' => $computerGroups
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in reports:', ['message' => $e->getMessage()]);
+            // Fallback jika error
+            return view('reports', [
+                'stats' => [
+                    'all' => 0,
+                    'active' => 0,
+                    'inactive_2weeks' => 0,
+                    'inactive_2months' => 0,
+                    'not_protected' => 0
+                ],
+                'computers' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15),
+                'computerGroups' => []
+            ]);
+        }
     }
 }
