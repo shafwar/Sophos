@@ -1377,44 +1377,17 @@
                 document.getElementById('riskDetailModalLabel').textContent :
                 document.getElementById('alertDetailModalLabel').textContent;
 
+            // Extract the category from the modal title (e.g., "Risk Details - Low Risk" -> "Low Risk")
+            const categoryMatch = title.match(/Risk Details - (.+)/);
+            const category = categoryMatch ? categoryMatch[1].toLowerCase().replace(' risk', '') : 'all'; // Default to 'all' or handle error
+
             if (!data || data.length === 0) {
                 alert('No data available to export');
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFontSize(16);
-            doc.text(title, 14, 15);
-
-            doc.setFontSize(10);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
-
-            const tableData = data.map(item => [
-                item.id || '-',
-                item.category || '-',
-                (item.description?.split('\n')[0] || '-').substring(0, 30) + '...',
-                item.severity?.toUpperCase() || '-',
-                formatDate(item.date || item.raisedAt)
-            ]);
-
-            doc.autoTable({
-                head: [['ID', 'Category', 'Description', 'Severity', 'Date']],
-                body: tableData,
-                startY: 30,
-                margin: { top: 30 },
-                styles: { fontSize: 8, cellPadding: 2 },
-                columnStyles: {
-                    0: { cellWidth: 40 },
-                    1: { cellWidth: 30 },
-                    2: { cellWidth: 50 },
-                    3: { cellWidth: 25 },
-                    4: { cellWidth: 35 }
-                }
-            });
-
-            doc.save(`${title.replace(/\s+/g, '_').toLowerCase()}_${formatDateForFilename(new Date())}.pdf`);
+            // Redirect to the Laravel export route
+            window.location.href = `/risk/export/${encodeURIComponent(category)}/pdf`; // Assuming you add a PDF export route
         }
 
         function exportToCSV(type) {
@@ -1423,36 +1396,35 @@
                 document.getElementById('riskDetailModalLabel').textContent :
                 document.getElementById('alertDetailModalLabel').textContent;
 
+            // Extract the category from the modal title
+            const categoryMatch = title.match(/Risk Details - (.+)/);
+            const category = categoryMatch ? categoryMatch[1].toLowerCase().replace(' risk', '') : 'all'; // Default to 'all' or handle error
+
             if (!data || data.length === 0) {
                 alert('No data available to export');
                 return;
             }
 
-            const headers = ['ID', 'Category', 'Description', 'Severity', 'Date', 'Source', 'Location', 'Endpoint Type', 'Endpoint ID'];
-
-            const csvData = data.map(item => ([
-                item.id || '-',
-                item.category || '-',
-                (item.description || '-').replace(/[\n,]/g, ' '),
-                item.severity?.toUpperCase() || '-',
-                formatDate(item.date || item.raisedAt),
-                item.source || '-',
-                item.location || '-',
-                item.endpoint_type || '-',
-                item.endpoint_id || '-'
-            ]));
-
-            const csvContent = [
-                headers.join(','),
-                ...csvData.map(row => row.join(','))
-            ].join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, `${title.replace(/\s+/g, '_').toLowerCase()}_${formatDateForFilename(new Date())}.csv`);
+            // Redirect to the Laravel export route
+            window.location.href = `/risk/export/${encodeURIComponent(category)}/csv`; // Assuming you add a CSV export route
         }
 
         function showEventDetails(item) {
             const detailsContent = document.getElementById('eventDetailsContent');
+
+            // --- Placeholder for generating a simple individual solution ---
+            let individualSolution = "Review the alert details and take appropriate action."; // Default solution
+            if (item.severity === 'high') {
+                individualSolution = "Investigate this high-severity alert immediately. Isolate the affected system if necessary.";
+            } else if (item.severity === 'medium') {
+                individualSolution = "Assess this medium-severity alert. Determine if it requires immediate action or can be scheduled.";
+            } else if (item.severity === 'low'){
+                 individualSolution = "Monitor this low-severity alert. It might indicate potential issues if it occurs frequently.";
+            }
+            // You could add more complex logic here based on item.category or item.description
+            // --- End Placeholder ---
+
+
             let detailsHtml = `
                 <div class="event-details">
                     <div class="detail-section">
@@ -1469,7 +1441,7 @@
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Time:</span>
-                            <span class="detail-value">${item.date ? new Date(item.date).toLocaleString() : '-'}</span>
+                            <span class="detail-value">${item.date ? new Date(item.date).toLocaleString() : (item.raisedAt ? new Date(item.raisedAt).toLocaleString() : '-')}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Description:</span>
@@ -1500,6 +1472,13 @@
                             <span class="detail-value">${item.endpoint_id || '-'}</span>
                         </div>
                     </div>
+
+                     <div class="detail-section">
+                        <h6 class="section-title">Recommended Action</h6>
+                        <div class="detail-row">
+                            <span class="detail-value">${individualSolution}</span> // Display the generated solution
+                        </div>
+                    </div>
                 </div>
             `;
 
@@ -1507,6 +1486,30 @@
 
             const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
             eventDetailsModal.show();
+        }
+
+        // Ensure your formatDate function handles both 'date' and 'raisedAt'
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+             // Try parsing as ISO string first (common for Sophos API)
+            try {
+                const date = new Date(dateString);
+                if (!isNaN(date)) {
+                     return date.toLocaleString();
+                }
+            } catch (e) {
+                // Fallback if parsing fails
+            }
+            // Try parsing as a simple date string
+             try {
+                const date = new Date(dateString.replace(/[-]/g, '/')); // Replace hyphens with slashes for better parsing support
+                if (!isNaN(date)) {
+                     return date.toLocaleString();
+                }
+            } catch (e) {
+                return '-'; // Return hyphen if all parsing fails
+            }
+            return '-';
         }
 
         // Helper functions
@@ -1517,15 +1520,6 @@
                 case 'low': return 'badge-low bg-success';
                 default: return 'badge-secondary bg-secondary';
             }
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '-';
-            return new Date(dateString).toLocaleString();
-        }
-
-        function formatDateForFilename(date) {
-            return date.toISOString().split('T')[0];
         }
 
         // Variable untuk melacak filter yang aktif
