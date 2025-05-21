@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\OverviewController;
+use App\Http\Controllers\RiskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,4 +104,8 @@ Route::get('/debug-api', function() {
 
     // AJAX Routes
     Route::post('/check-email', [AuthController::class, 'checkEmail'])->name('check.email');
+
+    // Risk Routes
+    Route::get('/dashboard-risk', [RiskController::class, 'dashboard'])->name('risk.dashboard');
+    Route::get('/risk/export/{category}/{format}', [RiskController::class, 'export'])->name('risk.export');
 });
