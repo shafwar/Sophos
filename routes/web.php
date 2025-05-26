@@ -108,4 +108,12 @@ Route::get('/debug-api', function() {
     // Risk Routes
     Route::get('/dashboard-risk', [RiskController::class, 'dashboard'])->name('risk.dashboard');
     Route::get('/risk/export/{category}/{format}', [RiskController::class, 'export'])->name('risk.export');
+
+    // Activity Log (khusus admin, pengecekan di controller)
+    Route::get('/admin/activity-log', [DashboardController::class, 'activityLog'])->name('admin.activity-log');
+
+    // Admin: Pending user approval
+    Route::get('/admin/pending-users', [DashboardController::class, 'pendingUsers'])->name('admin.pending-users');
+    Route::post('/admin/approve-user/{id}', [DashboardController::class, 'approveUser'])->name('admin.approve-user');
+    Route::post('/admin/decline-user/{id}', [DashboardController::class, 'declineUser'])->name('admin.decline-user');
 });
