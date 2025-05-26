@@ -329,6 +329,10 @@
                 <p>Silahkan login terlebih dahulu</p>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success mt-4" style="color: #fff; background: #38b000; border: none;">{{ session('success') }}</div>
+            @endif
+
             <form method="POST" action="{{ route('login.submit') }}" id="loginForm">
                 @csrf
                 <div class="form-group">

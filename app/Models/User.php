@@ -20,7 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'profile_picture', // Tambahkan ini
+        'profile_picture',
+        'role',
     ];
 
     /**
@@ -44,5 +45,24 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Scope untuk user pending
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    // Scope untuk user aktif
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    // Approve user
+    public function approve()
+    {
+        $this->status = 'active';
+        $this->save();
     }
 }

@@ -5,6 +5,7 @@ use App\Models\User; // Tambahkan import ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash; // Tambahkan import ini
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -31,6 +32,14 @@ class AuthController extends Controller
 
         // Coba autentikasi
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            // Cek status user
+            $user = Auth::user();
+            if ($user->status !== 'active') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Akun Anda belum di-approve admin.'
+                ])->withInput();
+            }
             // Regenerasi sesi untuk keamanan
             $request->session()->regenerate();
 
@@ -86,16 +95,19 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'status' => 'pending',
         ]);
 
-        // Login user yang baru dibuat
-        Auth::login($user);
+        // Log ke activity_logs
+        DB::table('activity_logs')->insert([
+            'user_id' => $user->id,
+            'activity' => 'Register (pending approval)',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        // Regenerasi sesi untuk keamanan
-        $request->session()->regenerate();
-
-        // Redirect ke dashboard
-        return redirect()->route('dashboard')
-            ->with('success', 'Registration successful! Welcome to Pertagas Sophos.');
+        // Redirect ke login dengan pesan
+        return redirect()->route('login')
+            ->with('success', 'Akun Anda menunggu persetujuan admin.');
     }
 }

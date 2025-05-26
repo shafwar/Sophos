@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
         <!-- Brand -->
-        <a class="navbar-brand" href="{{route('dashboard')}}">
+        <a class="navbar-brand" href="{{ route('dashboard') }}">
             <i class="fas fa-shield-alt"></i>
             <span>SIPANDI</span>
         </a>
@@ -15,28 +15,51 @@
         <!-- Nav Items -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                <!-- Dashboards -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Dashboards</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('overview')}}">Overview</a></li>
-                        <li><a class="dropdown-item" href="{{ route('analytics')}}">Analytics</a></li>
-                    </ul>
-                </li>
+                
+                @if(auth()->user() && auth()->user()->role === 'admin')
+                    <!-- Dashboards -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboards</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('overview')}}">Overview</a></li>
+                            <li><a class="dropdown-item" href="{{ route('analytics')}}">Analytics</a></li>
+                        </ul>
+                    </li>
 
-                <!-- Threat Analysis -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" data-bs-toggle="dropdown">
-                        <i class="fas fa-shield-virus"></i>
-                        <span>Threat Analysis</span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('reports')}}">Reports</a></li>
-                    </ul>
-                </li>
+                     <!-- Threat Analysis -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-shield-virus"></i>
+                            <span>Threat Analysis</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('reports')}}">Reports</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Pending Approvals -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{{ route('admin.pending-users') }}">
+                            <i class="fas fa-user-clock"></i>
+                            <span>Pending Approvals</span>
+                            @php $pendingCount = \App\Models\User::pending()->count(); @endphp
+                            @if($pendingCount > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $pendingCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
+                    <!-- Activity Log (khusus admin) -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.activity-log') }}">
+                            <i class="fas fa-list"></i>
+                            <span>Activity Log</span>
+                        </a>
+                    </li>
+                @endif
 
                 <!-- Alerts -->
                 <li class="nav-item">
@@ -47,11 +70,22 @@
                 </li>
 
                 <!-- User Icons -->
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" data-bs-toggle="dropdown">
                         <i class="fas fa-cog"></i>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <div class="dropdown-item d-flex align-items-center justify-content-between">
+                                <span><i class="fas fa-moon me-2"></i>Dark Mode</span>
+                                <div class="form-check form-switch ms-2">
+                                    <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </li>
+                
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user"></i>
@@ -77,161 +111,3 @@
         </div>
     </div>
 </nav>
-
-<style>
-/* Navbar Specific Styles */
-.navbar {
-    background-color: #1b258f;
-    padding: 0.8rem 2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.navbar-brand {
-    color: white;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.navbar-brand i {
-    font-size: 1.4rem;
-    color: var(--secondary-blue);
-}
-
-.navbar-brand:hover {
-    color: white;
-}
-
-.navbar-nav {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-}
-
-.navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.9) !important;
-    padding: 0.8rem 1.2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-.navbar-nav .nav-link i {
-    font-size: 1.1rem;
-}
-
-.navbar-nav .nav-link:hover {
-    color: white !important;
-}
-
-.navbar-nav .nav-link:hover::after {
-    width: 80%;
-}
-
-.navbar-nav .nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background-color: var(--secondary-blue);
-    transition: all 0.3s ease;
-    transform: translateX(-50%);
-}
-
-/* Dropdown Specific Styles */
-.dropdown-menu {
-    background-color: white;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    animation: fadeInDown 0.3s ease;
-    margin-top: 0.5rem;
-}
-
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 0.7rem 1.2rem;
-    transition: all 0.2s ease;
-}
-
-.dropdown-item:hover {
-    background-color: #f5f5f5;
-    transform: translateX(5px);
-}
-
-.dropdown-item i {
-    width: 20px;
-    text-align: center;
-    margin-right: 10px;
-    color: var(--primary-blue);
-}
-
-.dropdown-item.text-danger {
-    color: var(--danger-color) !important;
-}
-
-.dropdown-item.text-danger:hover {
-    background-color: rgba(220, 53, 69, 0.1);
-}
-
-/* Mobile Responsive Styles */
-@media (max-width: 991.98px) {
-    .navbar {
-        padding: 0.5rem 1rem;
-    }
-
-    .navbar-nav {
-        padding: 1rem 0;
-    }
-
-    .navbar-nav .nav-link {
-        padding: 0.5rem 1rem;
-    }
-
-    .navbar-nav .nav-link::after {
-        display: none;
-    }
-
-    .dropdown-menu {
-        border: none;
-        background: transparent;
-        box-shadow: none;
-        padding: 0 1rem;
-    }
-
-    .dropdown-item {
-        color: rgba(255, 255, 255, 0.9) !important;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white !important;
-    }
-}
-
-/* Navbar Toggler Custom Styles */
-.navbar-toggler {
-    border: none;
-    padding: 0.5rem;
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.navbar-toggler:focus {
-    box-shadow: none;
-    outline: none;
-}
-
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-}
-</style>

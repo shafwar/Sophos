@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,32 +21,31 @@ class DashboardController extends Controller
 
     public function index()
     {
-        try {
-            // Cache metrics data for 5 minutes
-            $metrics = Cache::remember('dashboard_metrics', 300, function () {
-                return $this->sophosApi->getMetrics();
-            });
+        $user = Auth::user();
+        // Catat activity log manual (tanpa model)
+        DB::table('activity_logs')->insert([
+            'user_id' => $user->id,
+            'activity' => 'Membuka dashboard',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-            if (!$metrics) {
-                $metrics = $this->getDefaultMetrics();
-            }
+        // Ambil data metrics
+        $metrics = $this->sophosApi->getMetrics() ?? $this->getDefaultMetrics();
 
-            return view('dashboard', [
-                'riskData' => $metrics,
-                'pageTitle' => 'Dashboard'
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error in dashboard:', ['message' => $e->getMessage()]);
-            return view('dashboard', [
-                'riskData' => $this->getDefaultMetrics(),
-                'pageTitle' => 'Dashboard'
-            ]);
+        if ($user->role === 'user') {
+            return view('dashboard', ['riskData' => $metrics]);
         }
+        if ($user->role === 'admin') {
+            return view('admin_dashboard', ['riskData' => $metrics]);
+        }
+        abort(403);
     }
 
     public function overview()
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
         try {
             $usersData = $this->sophosApi->getUsers();
 
@@ -93,6 +95,8 @@ class DashboardController extends Controller
 
     public function analytics()
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
         try {
             // Cache user data for 5 minutes
             $userData = Cache::remember('sophos_users_data', 300, function () {
@@ -300,6 +304,27 @@ class DashboardController extends Controller
                 );
             }
 
+            // Jika data kosong, tambahkan data dummy untuk testing
+            $hasData = collect($chartData)->sum(function($item) {
+                return $item['highRisk'] + $item['mediumRisk'] + $item['lowRisk'];
+            });
+            if ($hasData === 0) {
+                $chartData = [
+                    ['month' => 'Jan', 'highRisk' => 2, 'mediumRisk' => 1, 'lowRisk' => 3],
+                    ['month' => 'Feb', 'highRisk' => 1, 'mediumRisk' => 2, 'lowRisk' => 2],
+                    ['month' => 'Mar', 'highRisk' => 0, 'mediumRisk' => 1, 'lowRisk' => 4],
+                    ['month' => 'Apr', 'highRisk' => 3, 'mediumRisk' => 0, 'lowRisk' => 1],
+                    ['month' => 'May', 'highRisk' => 1, 'mediumRisk' => 1, 'lowRisk' => 2],
+                    ['month' => 'Jun', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Jul', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Aug', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Sep', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Oct', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Nov', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Dec', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                ];
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $chartData
@@ -471,6 +496,8 @@ class DashboardController extends Controller
 
     public function reports()
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
         try {
             $computersData = $this->sophosApi->getComputers();
 
@@ -516,5 +543,79 @@ class DashboardController extends Controller
                 'computerGroups' => []
             ]);
         }
+    }
+
+    // Tambahkan method untuk admin melihat activity log
+    public function activityLog()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
+
+        // Statistik user
+        $totalUsers = \App\Models\User::count();
+        // Active users: user yang pernah login dalam 24 jam terakhir (butuh kolom last_login_at, fallback ke totalUsers jika tidak ada)
+        $activeUsers = \App\Models\User::count();
+        // Jika ada kolom last_login_at, gunakan baris di bawah:
+        // $activeUsers = \App\Models\User::whereNotNull('last_login_at')->where('last_login_at', '>=', now()->subDay())->count();
+
+        // Logins hari ini
+        $todaysLogins = DB::table('activity_logs')
+            ->where('activity', 'like', '%login%')
+            ->whereDate('created_at', now()->toDateString())
+            ->count();
+
+        // Recent activities
+        $logs = DB::table('activity_logs')
+            ->join('users', 'activity_logs.user_id', '=', 'users.id')
+            ->select('users.name as user_name', 'activity_logs.activity', 'activity_logs.created_at')
+            ->orderByDesc('activity_logs.created_at')
+            ->limit(10)
+            ->get();
+
+        return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins'));
+    }
+
+    // Admin: Lihat user pending
+    public function pendingUsers()
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
+        $pendingUsers = \App\Models\User::pending()->get();
+        return view('admin_pending_users', compact('pendingUsers'));
+    }
+
+    // Admin: Approve user
+    public function approveUser($id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
+        $pendingUser = \App\Models\User::findOrFail($id);
+        $pendingUser->approve();
+        // Log ke activity_logs
+        DB::table('activity_logs')->insert([
+            'user_id' => $user->id,
+            'activity' => 'Approve user: ' . $pendingUser->email,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        return redirect()->back()->with('success', 'User approved!');
+    }
+
+    // Admin: Decline user
+    public function declineUser($id)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'admin') abort(403);
+        $pendingUser = \App\Models\User::findOrFail($id);
+        $pendingUser->status = 'declined';
+        $pendingUser->save();
+        // Log ke activity_logs
+        DB::table('activity_logs')->insert([
+            'user_id' => $user->id,
+            'activity' => 'Decline user: ' . $pendingUser->email,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        return redirect()->back()->with('success', 'User declined!');
     }
 }
