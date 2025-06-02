@@ -9,7 +9,7 @@
 
     <!-- Core CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Animation Libraries -->
@@ -280,13 +280,6 @@
             background: #555;
         }
 
-        /* Content Container */
-        .main-content {
-            min-height: calc(100vh - 80px);
-            padding: 2rem;
-            margin-top: 1rem;
-        }
-
         /* Table Styles in Modal */
         .modal .table {
             margin-bottom: 0;
@@ -397,6 +390,79 @@
                 max-width: 95%;
                 margin: 0.5rem auto;
             }
+        }
+
+        /* DARK MODE ENHANCEMENT */
+        body.dark-mode .metric-label,
+        body.dark-mode .text-muted,
+        body.dark-mode .filter-label,
+        body.dark-mode .legend-text,
+        body.dark-mode .section-title,
+        body.dark-mode .detail-label,
+        body.dark-mode .detail-value {
+            color: #f1f1f1 !important;
+        }
+        body.dark-mode .form-check-label,
+        body.dark-mode .badge,
+        body.dark-mode .btn,
+        body.dark-mode .modal-title {
+            color: #fff !important;
+        }
+        body.dark-mode .bg-light {
+            background-color: #23263a !important;
+            color: #f1f1f1 !important;
+        }
+        body.dark-mode .bg-white {
+            background-color: #23263a !important;
+            color: #f1f1f1 !important;
+        }
+        body.dark-mode .table th,
+        body.dark-mode .table td {
+            color: #f1f1f1 !important;
+            background: #23263a !important;
+        }
+        body.dark-mode .legend-item {
+            background: #23263a !important;
+            color: #f1f1f1 !important;
+            border-color: #444 !important;
+        }
+        body.dark-mode .legend-item.active {
+            background: #1b258f !important;
+            color: #fff !important;
+        }
+        body.dark-mode .modal-header {
+            background-color: #1b258f !important;
+            color: #fff !important;
+        }
+        body.dark-mode .modal-footer {
+            background-color: #23263a !important;
+            color: #fff !important;
+        }
+        body.dark-mode .dropdown-item {
+            color: #f1f1f1 !important;
+        }
+        body.dark-mode .dropdown-item:hover {
+            background-color: #1b258f !important;
+            color: #fff !important;
+        }
+        body.dark-mode .footer {
+            background: #181c2f !important;
+            color: #f1f1f1 !important;
+        }
+
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
         }
     </style>
 
@@ -521,6 +587,52 @@
     <div class="main-content">
         @yield('content')
     </div>
+
+    <!-- INFO SECTION -->
+    @if(Route::currentRouteName() === 'dashboard')
+    <div class="row">
+        <div class="col-12">
+            <div class="info-card text-center p-4">
+                <i class="fas fa-shield-alt fa-4x text-primary mb-4"></i>
+                <h3 class="text-primary mb-3">Security Monitoring Dashboard</h3>
+                <p class="text-muted mb-4">
+                    You are viewing the security monitoring dashboard for your organization. 
+                    This dashboard provides real-time insights into your security posture and threat status.
+                </p>
+                @if(auth()->user()->role === 'user')
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>User Access:</strong> You have read-only access to security metrics. 
+                    For administrative functions, please contact your system administrator.
+                </div>
+                @endif
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-eye fa-2x text-info mb-2"></i>
+                            <h6>Real-time Monitoring</h6>
+                            <small class="text-muted">Live security status updates</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <h6>Threat Detection</h6>
+                            <small class="text-muted">Advanced security analysis</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-chart-bar fa-2x text-warning mb-2"></i>
+                            <h6>Risk Assessment</h6>
+                            <small class="text-muted">Comprehensive security metrics</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
        <!-- Footer -->
        <footer class="mt-5" style="background: #1b258f; color: #fff; padding: 0;">

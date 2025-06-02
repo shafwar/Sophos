@@ -78,9 +78,9 @@ Route::get('/debug-api', function() {
         Route::get('/{category}', [DashboardController::class, 'getAlertsByCategory']);
         Route::get('/low-risk', [DashboardController::class, 'getLowRiskData'])->name('alerts.low-risk');
 
-        // Export Routes
-        Route::get('/{category}/pdf', [DashboardController::class, 'exportAlertsPDF'])->name('alerts.export.pdf');
-        Route::get('/{category}/csv', [DashboardController::class, 'exportAlertsCSV'])->name('alerts.export.csv');
+        // Export Routes (DISABLED, gunakan /risk/export/{category}/{format} di bawah)
+        // Route::get('/{category}/pdf', [DashboardController::class, 'exportAlertsPDF'])->name('alerts.export.pdf');
+        // Route::get('/{category}/csv', [DashboardController::class, 'exportAlertsCSV'])->name('alerts.export.csv');
     });
 
     // Traffic Risk Routes
@@ -116,4 +116,8 @@ Route::get('/debug-api', function() {
     Route::get('/admin/pending-users', [DashboardController::class, 'pendingUsers'])->name('admin.pending-users');
     Route::post('/admin/approve-user/{id}', [DashboardController::class, 'approveUser'])->name('admin.approve-user');
     Route::post('/admin/decline-user/{id}', [DashboardController::class, 'declineUser'])->name('admin.decline-user');
+
+    // Admin: User List
+    Route::get('/admin/user-list', [DashboardController::class, 'userList'])->name('admin.user-list');
+    Route::delete('/admin/delete-user/{id}', [DashboardController::class, 'deleteUser'])->name('admin.delete-user');
 });

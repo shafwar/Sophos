@@ -23,9 +23,15 @@ class RiskController extends Controller
     public function export(Request $request, $category, $format = 'xlsx')
     {
         // Fetch the risk data for the given category
-        // Using SophosApiService seems more appropriate given your dashboard uses it
         $sophosApi = app(SophosApiService::class);
         $alerts = $sophosApi->getAlertsByCategory($category);
+
+        // Log satu contoh alert untuk debug mapping
+        if (!empty($alerts)) {
+            \Log::info('Sample alert for export:', ['sample' => $alerts[0]]);
+        } else {
+            \Log::info('No alerts found for export.');
+        }
 
         // Ensure alerts is an array
         $alerts = is_array($alerts) ? $alerts : [];
@@ -36,7 +42,6 @@ class RiskController extends Controller
         $filename = ucfirst($category).'_Risk_Report.' . ($format === 'pdf' ? 'pdf' : 'xlsx');
 
         // Pass the alerts data AND the solution to your Export class
-        // You will need to adjust your RiskExport class to handle both data and solution
         return Excel::download(new \App\Exports\RiskExport($alerts, $solution), $filename, ($format === 'pdf' ? \Maatwebsite\Excel\Excel::DOMPDF : \Maatwebsite\Excel\Excel::XLSX));
     }
 

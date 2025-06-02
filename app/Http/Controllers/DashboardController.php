@@ -227,9 +227,11 @@ class DashboardController extends Controller
         try {
             Log::info('Getting alerts for category: ' . $category);
 
-            $alerts = Cache::remember("alerts_$category", 300, function () use ($category) {
-                return $this->sophosApi->getAlertsByCategory($category);
-            });
+            if (strtolower($category) === 'all risk') {
+                $alerts = $this->sophosApi->getAllAlerts();
+            } else {
+                $alerts = $this->sophosApi->getAlertsByCategory($category);
+            }
 
             // Ensure we always return an array
             $alerts = is_array($alerts) ? $alerts : [];
@@ -616,6 +618,28 @@ class DashboardController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        return redirect()->back()->with('success', 'User declined!');
+        return redirect()->back()->with('error', 'User declined!');
+    }
+
+    // Ambil semua user untuk modal list user
+    public function userList()
+    {
+        $user = auth()->user();
+        if ($user->role !== 'admin') abort(403);
+        $users = \App\Models\User::select('id', 'name', 'email')->get();
+        return response()->json($users);
+    }
+
+    // Hapus user by id
+    public function deleteUser($id)
+    {
+        $user = auth()->user();
+        if ($user->role !== 'admin') abort(403);
+        $target = \App\Models\User::findOrFail($id);
+        if ($target->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Admin tidak bisa dihapus'], 403);
+        }
+        $target->delete();
+        return response()->json(['success' => true]);
     }
 }
