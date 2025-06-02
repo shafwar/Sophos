@@ -6,7 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard Admin - SIPANDI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Ganti link Font Awesome agar icon pasti muncul -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <!-- Hapus atau komen link Font Awesome lama jika ada -->
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -764,6 +767,88 @@
             display: none !important;
         }
     </style>
+    <!-- DARK MODE STYLES -->
+    <style>
+    body.dark-mode {
+        background-color: #181c2f !important;
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .dashboard-card,
+    body.dark-mode .traffic-risk-card,
+    body.dark-mode .modal-content,
+    body.dark-mode .info-card {
+        background: #23263a !important;
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .metric-label,
+    body.dark-mode .text-muted,
+    body.dark-mode .filter-label,
+    body.dark-mode .legend-text,
+    body.dark-mode .section-title,
+    body.dark-mode .detail-label,
+    body.dark-mode .detail-value {
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .form-check-label,
+    body.dark-mode .badge,
+    body.dark-mode .btn,
+    body.dark-mode .modal-title {
+        color: #fff !important;
+    }
+    body.dark-mode .bg-light {
+        background-color: #23263a !important;
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .bg-white {
+        background-color: #23263a !important;
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .table th,
+    body.dark-mode .table td {
+        color: #f1f1f1 !important;
+        background: #23263a !important;
+    }
+    body.dark-mode .alert {
+        background: #23263a !important;
+        color: #fff !important;
+        border-color: #444 !important;
+    }
+    body.dark-mode .legend-item {
+        background: #23263a !important;
+        color: #f1f1f1 !important;
+        border-color: #444 !important;
+    }
+    body.dark-mode .legend-item.active {
+        background: #1b258f !important;
+        color: #fff !important;
+    }
+    body.dark-mode .modal-header {
+        background-color: #1b258f !important;
+        color: #fff !important;
+    }
+    body.dark-mode .modal-footer {
+        background-color: #23263a !important;
+        color: #fff !important;
+    }
+    body.dark-mode .navbar {
+        background-color: #181c2f !important;
+    }
+    body.dark-mode .dropdown-menu {
+        background-color: #23263a !important;
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .dropdown-item {
+        color: #f1f1f1 !important;
+    }
+    body.dark-mode .dropdown-item:hover {
+        background-color: #1b258f !important;
+        color: #fff !important;
+    }
+    body.dark-mode .footer {
+        background: #181c2f !important;
+        color: #f1f1f1 !important;
+    }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -1017,10 +1102,10 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="riskDetailModalLabel">Risk Details</h5>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('risk')">
+                        <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportCurrentRiskDataToPDF()">
                             <i class="fas fa-file-pdf"></i> Export PDF
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-light" onclick="exportToCSV('risk')">
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="exportCurrentRiskDataToCSV()">
                             <i class="fas fa-file-csv"></i> Export CSV
                         </button>
                     </div>
@@ -1058,12 +1143,10 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="alertDetailModalLabel">Alert Details</h5>
                     <div class="ms-auto">
-                        <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('alert')">
+                        <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportCurrentAlertDataToPDF()">
                             <i class="fas fa-file-pdf"></i> Export PDF
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-light" onclick="exportToCSV('alert')">
-                            <i class="fas fa-file-csv"></i> Export CSV
-                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="exportCurrentAlertDataToCSV()">Export CSV</button>
                     </div>
                     <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1112,6 +1195,61 @@
         </div>
     </div>
     
+    <!-- INFO SECTION -->
+    <div class="row">
+        <div class="col-12">
+            <div class="info-card text-center p-4">
+                <i class="fas fa-shield-alt fa-4x text-primary mb-4"></i>
+                <h3 class="text-primary mb-3">Security Monitoring Dashboard</h3>
+                <p class="text-muted mb-4">
+                    You are viewing the security monitoring dashboard for your organization. 
+                    This dashboard provides real-time insights into your security posture and threat status.
+                </p>
+                
+                @if(auth()->user()->role === 'user')
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>User Access:</strong> You have read-only access to security metrics. 
+                    For administrative functions, please contact your system administrator.
+                </div>
+                @endif
+
+                @if(auth()->user()->role === 'admin')
+                <div class="alert alert-success">
+                    <i class="fas fa-crown me-2"></i>
+                    <strong>Administrator Access:</strong> You have full access to all system functions.
+                    </a>
+                </div>
+                @endif
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-eye fa-2x text-info mb-2"></i>
+                            <h6>Real-time Monitoring</h6>
+                            <small class="text-muted">Live security status updates</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <h6>Threat Detection</h6>
+                            <small class="text-muted">Advanced security analysis</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3">
+                            <i class="fas fa-chart-bar fa-2x text-warning mb-2"></i>
+                            <h6>Risk Assessment</h6>
+                            <small class="text-muted">Comprehensive security metrics</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Footer -->
     <footer class="mt-5" style="background: #1b258f; color: #fff; padding: 0;">
     <div class="container-fluid px-0">
@@ -1376,9 +1514,7 @@
         function showMonthlyDetails(month) {
             const tableBody = document.getElementById('alertDetailTableBody');
             const modalTitle = document.getElementById('alertDetailModalLabel');
-
             modalTitle.textContent = `Alert Details - ${month}`;
-
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center">
@@ -1387,62 +1523,94 @@
                         </div>
                     </td>
                 </tr>`;
-
             const alertModal = new bootstrap.Modal(document.getElementById('alertDetailModal'));
             alertModal.show();
 
-            fetch(`/traffic-risk/monthly-details/${month}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(response => {
-                    tableBody.innerHTML = '';
-                    currentAlertData = response.incidents || [];
+            // Ambil filter aktif
+            const activeLevels = [];
+            if (activeFilters.lowRisk) activeLevels.push('low');
+            if (activeFilters.mediumRisk) activeLevels.push('medium');
+            if (activeFilters.highRisk) activeLevels.push('high');
 
-                    if (currentAlertData.length === 0) {
-                        tableBody.innerHTML = `
-                            <tr>
-                                <td colspan="6" class="text-center">No alerts found for ${month}</td>
-                            </tr>`;
-                        return;
-                    }
-
-                    currentAlertData.forEach((item, index) => {
-                        const row = document.createElement('tr');
-                        row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
-
-                        const severityClass = getSeverityClass(item.severity);
-
-                        row.innerHTML = `
-                            <td class="text-muted small">${item.id || '-'}</td>
-                            <td>${item.category || '-'}</td>
-                            <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
-                            <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
-                            <td class="small">${formatDate(item.date)}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
-                            </td>
-                        `;
-
-                        const viewButton = row.querySelector('.view-details');
-                        viewButton.addEventListener('click', () => showEventDetails(item));
-
-                        tableBody.appendChild(row);
+            if (activeLevels.length === 1) {
+                // Hanya satu filter aktif, ambil data sesuai level
+                fetch(`/traffic-risk/details/${month}/${activeLevels[0]}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(response => {
+                        tableBody.innerHTML = '';
+                        const data = response.incidents || [];
+                        currentAlertData = data;
+                        if (data.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan=\"6\" class=\"text-center\">No alerts found for ${month}</td></tr>`;
+                            return;
+                        }
+                        data.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
+                            const severityClass = getSeverityClass(item.severity);
+                            row.innerHTML = `
+                                <td class="text-muted small">${item.id || '-'}</td>
+                                <td>${item.category || '-'}</td>
+                                <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
+                                <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                                <td class="small">${formatDate(item.date)}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
+                                </td>
+                            `;
+                            const viewButton = row.querySelector('.view-details');
+                            viewButton.addEventListener('click', () => showEventDetails(item));
+                            tableBody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger"><div class="alert alert-danger mb-0"><strong>Error:</strong> An error occurred while fetching the data.</div></td></tr>`;
                     });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="text-center text-danger">
-                                <div class="alert alert-danger mb-0">
-                                    <strong>Error:</strong> An error occurred while fetching the data.
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
+            } else {
+                // Lebih dari satu filter aktif, ambil semua dan filter di frontend
+                fetch(`/traffic-risk/monthly-details/${month}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(response => {
+                        tableBody.innerHTML = '';
+                        let data = response.incidents || [];
+                        // Filter sesuai filter aktif
+                        data = data.filter(item => activeLevels.includes((item.severity || '').toLowerCase()));
+                        currentAlertData = data;
+                        if (data.length === 0) {
+                            tableBody.innerHTML = `<tr><td colspan=\"6\" class=\"text-center\">No alerts found for ${month}</td></tr>`;
+                            return;
+                        }
+                        data.forEach((item, index) => {
+                            const row = document.createElement('tr');
+                            row.style.animation = `fadeIn 0.3s ease-in-out ${index * 0.1}s`;
+                            const severityClass = getSeverityClass(item.severity);
+                            row.innerHTML = `
+                                <td class="text-muted small">${item.id || '-'}</td>
+                                <td>${item.category || '-'}</td>
+                                <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
+                                <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                                <td class="small">${formatDate(item.date)}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-info view-details">View Details</button>
+                                </td>
+                            `;
+                            const viewButton = row.querySelector('.view-details');
+                            viewButton.addEventListener('click', () => showEventDetails(item));
+                            tableBody.appendChild(row);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger"><div class="alert alert-danger mb-0"><strong>Error:</strong> An error occurred while fetching the data.</div></td></tr>`;
+                    });
+            }
         }
 
         // Updated export functions
@@ -2060,4 +2228,98 @@
             const initialHighRiskCount = parseInt(document.getElementById('highRiskChart').getAttribute('data-value') || '0');
             checkHighRisk(initialHighRiskCount);
         });
+
+        window.exportCurrentAlertDataToCSV = function() {
+            if (!currentAlertData || currentAlertData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            const header = Object.keys(currentAlertData[0]);
+            const csvRows = [
+                header.join(','),
+                ...currentAlertData.map(row => header.map(field => `"${(row[field] ?? '').toString().replace(/"/g, '""')}"`).join(','))
+            ];
+            const csvContent = csvRows.join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            let modalTitle = document.getElementById('alertDetailModalLabel').textContent;
+            let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '') + '.csv';
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        window.exportCurrentAlertDataToPDF = function() {
+            if (!currentAlertData || currentAlertData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            // Ambil header dan data
+            const header = Object.keys(currentAlertData[0]);
+            const data = currentAlertData.map(row => header.map(field => row[field] ?? ''));
+            // Nama file dari judul modal
+            let modalTitle = document.getElementById('alertDetailModalLabel').textContent;
+            let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '') + '.pdf';
+            // Buat PDF
+            const doc = new window.jspdf.jsPDF('l', 'pt', 'a4');
+            doc.text(modalTitle, 40, 40);
+            doc.autoTable({
+                head: [header],
+                body: data,
+                startY: 60,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [27, 37, 143] }
+            });
+            doc.save(fileName);
+        };
+
+        window.exportCurrentRiskDataToCSV = function() {
+            if (!currentRiskData || currentRiskData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            const header = Object.keys(currentRiskData[0]);
+            const csvRows = [
+                header.join(','),
+                ...currentRiskData.map(row => header.map(field => `"${(row[field] ?? '').toString().replace(/"/g, '""')}"`).join(','))
+            ];
+            const csvContent = csvRows.join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            let modalTitle = document.getElementById('riskDetailModalLabel').textContent;
+            let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
+            fileName = fileName.replace(/\.xlsx$/i, ''); // hapus .xlsx jika ada
+            fileName = fileName.replace(/\.csv$/i, ''); // hapus .csv jika ada
+            fileName += '.csv';
+            console.log('Exporting CSV with fileName:', fileName, 'blob type:', blob.type, 'url:', url);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        window.exportCurrentRiskDataToPDF = function() {
+            console.log('Exporting currentRiskData to PDF:', currentRiskData);
+            if (!currentRiskData || currentRiskData.length === 0) {
+                alert('No data available to export');
+                return;
+            }
+            const header = Object.keys(currentRiskData[0]);
+            const data = currentRiskData.map(row => header.map(field => row[field] ?? ''));
+            let modalTitle = document.getElementById('riskDetailModalLabel').textContent;
+            let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '') + '.pdf';
+            if (!fileName.endsWith('.pdf')) fileName += '.pdf';
+            const doc = new window.jspdf.jsPDF('l', 'pt', 'a4');
+            doc.text(modalTitle, 40, 40);
+            doc.autoTable({
+                head: [header],
+                body: data,
+                startY: 60,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [27, 37, 143] }
+            });
+            doc.save(fileName);
+        };
     </script>

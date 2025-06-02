@@ -4,7 +4,7 @@
 <style>
     /* Updated Color Scheme */
     :root {
-        --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --primary-gradient: linear-gradient(135deg, #2563eb 0%,rgb(155, 155, 155) 100%);
         --sidebar-bg: #f1f5f9;
         --content-bg: #f8fafc;
         --card-bg: #ffffff;
@@ -436,17 +436,13 @@
             <div class="col-md-3">
                 <div class="sidebar">
                     <nav>
-                        <a href="#" class="nav-link-custom active">
+                        <a href="#" class="nav-link-custom active" id="profileTabBtn">
                             <i class="fas fa-user"></i>
                             Profile Settings
                         </a>
-                        <a href="#" class="nav-link-custom">
+                        <a href="#" class="nav-link-custom" id="passwordTabBtn">
                             <i class="fas fa-lock"></i>
                             Password
-                        </a>
-                        <a href="#" class="nav-link-custom">
-                            <i class="fas fa-check-circle"></i>
-                            Verification
                         </a>
                     </nav>
                 </div>
@@ -475,46 +471,63 @@
                         </div>
 
                         <!-- Form Fields - Better Layout -->
-                        <div class="form-row fade-in">
-                            <div class="form-col">
-                                <div class="form-section">
-                                    <label class="form-label">Full Name</label>
-                                    <div class="input-with-icon">
-                                        <span class="input-icon">
-                                            <i class="fas fa-user"></i>
-                                        </span>
-                                        <input type="text" class="form-control" name="name"
-                                               value="{{ old('name', $user->name) }}" required>
+                        <div id="profileTabContent">
+                            <div class="form-row fade-in">
+                                <div class="form-col">
+                                    <div class="form-section">
+                                        <label class="form-label">Full Name</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            <input type="text" class="form-control" name="name"
+                                                   value="{{ old('name', $user->name) }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row fade-in">
+                                <div class="form-col">
+                                    <div class="form-section">
+                                        <label class="form-label">Email Address</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">
+                                                <i class="fas fa-envelope"></i>
+                                            </span>
+                                            <input type="email" class="form-control" name="email"
+                                                   value="{{ old('email', $user->email) }}" required>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="form-row fade-in">
-                            <div class="form-col">
-                                <div class="form-section">
-                                    <label class="form-label">Email Address</label>
-                                    <div class="input-with-icon">
-                                        <span class="input-icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </span>
-                                        <input type="email" class="form-control" name="email"
-                                               value="{{ old('email', $user->email) }}" required>
+                        <div id="passwordTabContent" style="display:none;">
+                            <div class="form-row fade-in">
+                                <div class="form-col">
+                                    <div class="form-section">
+                                        <label class="form-label">Current Password</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">
+                                                <i class="fas fa-lock"></i>
+                                            </span>
+                                            <input type="password" class="form-control" name="current_password" placeholder="Enter current password">
+                                        </div>
+                                        @if ($errors->has('current_password'))
+                                            <div class="error-message">{{ $errors->first('current_password') }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="form-row fade-in">
-                            <div class="form-col">
-                                <div class="form-section">
-                                    <label class="form-label">New Password</label>
-                                    <div class="input-with-icon">
-                                        <span class="input-icon">
-                                            <i class="fas fa-key"></i>
-                                        </span>
-                                        <input type="password" class="form-control" name="password"
-                                               placeholder="Leave blank to keep current password">
+                            <div class="form-row fade-in">
+                                <div class="form-col">
+                                    <div class="form-section">
+                                        <label class="form-label">New Password</label>
+                                        <div class="input-with-icon">
+                                            <span class="input-icon">
+                                                <i class="fas fa-key"></i>
+                                            </span>
+                                            <input type="password" class="form-control" name="password" placeholder="Leave blank to keep current password">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -600,11 +613,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (hasError) {
             e.preventDefault();
+            console.log('Form tidak disubmit karena ada error validasi.');
             const firstError = form.querySelector('.error');
             if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         } else {
+            console.log('Form valid, submit ke server.');
             // Success animation
             const saveButton = form.querySelector('.save-button');
             if (saveButton) {
@@ -711,6 +726,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
         pictureContainer.addEventListener('mouseleave', function() {
             this.style.transform = 'scale(1)';
+        });
+    }
+
+    // Tab switching logic
+    const profileTabBtn = document.getElementById('profileTabBtn');
+    const passwordTabBtn = document.getElementById('passwordTabBtn');
+    const profileTabContent = document.getElementById('profileTabContent');
+    const passwordTabContent = document.getElementById('passwordTabContent');
+
+    profileTabBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        profileTabBtn.classList.add('active');
+        passwordTabBtn.classList.remove('active');
+        profileTabContent.style.display = '';
+        passwordTabContent.style.display = 'none';
+    });
+    passwordTabBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        passwordTabBtn.classList.add('active');
+        profileTabBtn.classList.remove('active');
+        profileTabContent.style.display = 'none';
+        passwordTabContent.style.display = '';
+    });
+
+    // Fallback: force submit form jika event submit tidak ter-trigger
+    const saveButton = document.querySelector('.save-button');
+    if (saveButton) {
+        saveButton.addEventListener('click', function(e) {
+            // Jika form tidak valid, jangan submit
+            let hasError = false;
+            const requiredFields = form.querySelectorAll('input[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) hasError = true;
+            });
+            if (!hasError) {
+                console.log('Fallback: force submit form.');
+                form.submit();
+            }
         });
     }
 });
