@@ -624,7 +624,7 @@ class DashboardController extends Controller
     // Ambil semua user untuk modal list user
     public function userList()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->role !== 'admin') abort(403);
         $users = \App\Models\User::select('id', 'name', 'email')->get();
         return response()->json($users);
@@ -633,7 +633,7 @@ class DashboardController extends Controller
     // Hapus user by id
     public function deleteUser($id)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if ($user->role !== 'admin') abort(403);
         $target = \App\Models\User::findOrFail($id);
         if ($target->role === 'admin') {

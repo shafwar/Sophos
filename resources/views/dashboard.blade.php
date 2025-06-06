@@ -1,12 +1,23 @@
 @extends('layouts.app')
 @section('content')
 
+<!-- Add Pertamina Gas logo in dashboard page navbar -->
+@push('styles')
+<style>
+.navbar-brand img {
+    height: 30px !important;
+    object-fit: contain !important;
+    margin-left: 8px;
+}
+</style>
+@endpush
+
 <!-- SiPandi Central Dashboard Header -->
 <div class="container-fluid px-4 py-3 mt-4" style="background: white; border-bottom: 1px solid #e5e7eb;">
     <div class="d-flex justify-content-between align-items-center">
-        <div>
+        <div class="d-flex align-items-center">
             <h2 class="mb-1" style="color: #1b258f; font-size: 1.75rem; font-weight: 600;">SIPANDI Central Dashboard</h2>
-            <p class="text-muted mb-0" style="font-size: 0.95rem;">Welcome back, {{ auth()->user()->name }}! See a snapshot of your security protection</p>
+<img src="https://pertagas.pertamina.com/Static/pertagas/common/images/logo-pertagas-white.png" alt="PERTAMINA GAS" style="height: 40px; margin-left: 10px; object-fit: contain; border: none;">
         </div>
         <div class="text-end">
             <div>Role: <span class="fw-bold text-success" style="text-transform: capitalize;">{{ ucfirst(auth()->user()->role) }}</span></div>
@@ -166,12 +177,9 @@
                 <h5 class="modal-title" id="riskDetailModalLabel">Risk Details</h5>
                 <div class="ms-auto">
                     @if(auth()->user() && auth()->user()->role === 'admin')
-                    <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportCurrentRiskDataToPDF()">
-                        <i class="fas fa-file-pdf"></i> Export PDF
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="exportCurrentRiskDataToCSV()">
-                        <i class="fas fa-file-csv"></i> Export CSV
-                    </button>
+                    <a href="#" id="exportRiskExcelButton" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
                     @else
                     <button type="button" class="btn btn-sm btn-outline-light me-2" disabled title="Hanya admin yang bisa export">
                         <i class="fas fa-file-pdf"></i> Export PDF
@@ -217,10 +225,14 @@
                 <h5 class="modal-title" id="alertDetailModalLabel">Alert Details</h5>
                 <div class="ms-auto">
                     @if(auth()->user() && auth()->user()->role === 'admin')
-                    <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('alert')">
+                    {{-- Nonaktifkan atau ganti tombol Export PDF jika tidak ada backend PDF export --}}
+                    {{-- <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="exportToPDF('alert')">
                         <i class="fas fa-file-pdf"></i> Export PDF
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="exportCurrentAlertDataToCSV()">Export CSV</button>
+                    </button> --}}
+                    {{-- Ganti tombol Export CSV menjadi Export Excel dan panggil rute backend --}}
+                    <a href="#" id="exportAlertExcelButton" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </a>
                     @else
                     <button type="button" class="btn btn-sm btn-outline-light me-2" disabled title="Hanya admin yang bisa export">
                         <i class="fas fa-file-pdf"></i> Export PDF
@@ -769,6 +781,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const riskModal = new bootstrap.Modal(document.getElementById('riskDetailModal'));
         riskModal.show();
 
+        // Update the export button link when modal is shown
+        const exportButton = document.getElementById('exportRiskExcelButton');
+        if (exportButton) {
+             // Assuming the category matches the segment in the URL, e.g., 'low-risk' or 'high-risk'
+            const exportCategory = category.toLowerCase().replace(' ', '-'); // Format category for URL
+            exportButton.href = `/risk/export/${exportCategory}/xlsx`;
+        }
+
         fetch(`/alerts/${encodeURIComponent(category.toLowerCase())}`)
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -835,6 +855,16 @@ document.addEventListener('DOMContentLoaded', function() {
             </tr>`;
         const alertModal = new bootstrap.Modal(document.getElementById('alertDetailModal'));
         alertModal.show();
+
+        // Update the export button link in alertDetailModal
+        const exportButton = document.getElementById('exportAlertExcelButton');
+        if (exportButton) {
+            // For simplicity now, always export all-risk in XLSX from this modal
+            // A better approach requires backend changes to filter by month/severity
+            exportButton.href = `/risk/export/all-risk/xlsx`;
+             // Anda bisa menambahkan filter bulan jika backend mendukung
+             // exportButton.href = `/risk/export/all-risk/xlsx?month=${month}`;
+        }
 
         // Ambil filter aktif
         const activeLevels = [];
@@ -923,83 +953,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.exportCurrentRiskDataToCSV = function() {
-        if (!currentRiskData || currentRiskData.length === 0) {
-            alert('No data available to export');
-            return;
-        }
-        const header = Object.keys(currentRiskData[0]);
-        const csvRows = [
-            header.join(','),
-            ...currentRiskData.map(row => `"${header.map(field => (row[field] ?? '').toString().replace(/"/g, '""')).join('","')}"`)
-        ];
-        const csvContent = csvRows.join('\r\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        let modalTitle = document.getElementById('riskDetailModalLabel').textContent;
-        let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
-        fileName = fileName.replace(/\.xlsx$/i, '');
-        fileName = fileName.replace(/\.csv$/i, '');
-        fileName += '.csv';
-        console.log('Exporting CSV with fileName:', fileName, 'blob type:', blob.type, 'url:', url);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    window.exportCurrentRiskDataToPDF = function() {
-        if (!currentRiskData || currentRiskData.length === 0) {
-            alert('No data available to export');
-            return;
-        }
-        const header = Object.keys(currentRiskData[0]);
-        const data = currentRiskData.map(row => header.map(field => row[field] ?? ''));
-        let modalTitle = document.getElementById('riskDetailModalLabel').textContent;
-        let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
-        fileName = fileName.replace(/\.pdf$/i, '');
-        fileName += '.pdf';
-        console.log('Exporting PDF with fileName:', fileName);
-        const doc = new window.jspdf.jsPDF('l', 'pt', 'a4');
-        doc.text(modalTitle, 40, 40);
-        doc.autoTable({
-            head: [header],
-            body: data,
-            startY: 60,
-            styles: { fontSize: 8 },
-            headStyles: { fillColor: [27, 37, 143] }
-        });
-        doc.save(fileName);
-    };
-
-    window.exportCurrentAlertDataToCSV = function() {
-        if (!currentAlertData || currentAlertData.length === 0) {
-            alert('No data available to export');
-            return;
-        }
-        const header = Object.keys(currentAlertData[0]);
-        const csvRows = [
-            header.join(','),
-            ...currentAlertData.map(row => header.map(field => `"${(row[field] ?? '').toString().replace(/"/g, '""')}"`).join(','))
-        ];
-        const csvContent = csvRows.join('\r\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        let modalTitle = document.getElementById('alertDetailModalLabel').textContent;
-        let fileName = modalTitle.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\-]/g, '');
-        fileName = fileName.replace(/\.xlsx$/i, '');
-        fileName = fileName.replace(/\.csv$/i, '');
-        fileName += '.csv';
-        console.log('Exporting CSV with fileName:', fileName, 'blob type:', blob.type, 'url:', url);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    function showEventDetails(item) {
+    window.showEventDetails = function(item) {
         const detailsContent = document.getElementById('eventDetailsContent');
 
         let individualSolution = "Review the alert details and take appropriate action.";

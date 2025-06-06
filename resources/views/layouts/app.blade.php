@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -473,9 +474,10 @@
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container-fluid">
             <!-- Brand -->
-            <a class="navbar-brand" href="{{ route('dashboard') }}">
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
                 <i class="fas fa-shield-alt"></i>
-                <span>SIPANDI</span>
+                <span class="ms-2 me-3">SIPANDI</span>
+<img src="https://pertagas.pertamina.com/Static/pertagas/common/images/logo-pertagas-white.png" alt="PERTAMINA GAS" style="height: 30px; object-fit: contain;">
             </a>
 
             <!-- Mobile Toggle -->
@@ -486,7 +488,7 @@
             <!-- Nav Items -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    
+
                     @if(auth()->user() && auth()->user()->role === 'admin')
                         <!-- Dashboards -->
                         <li class="nav-item dropdown">
@@ -556,7 +558,7 @@
                             </li>
                         </ul>
                     </li>
-                    
+
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user"></i>
@@ -596,13 +598,13 @@
                 <i class="fas fa-shield-alt fa-4x text-primary mb-4"></i>
                 <h3 class="text-primary mb-3">Security Monitoring Dashboard</h3>
                 <p class="text-muted mb-4">
-                    You are viewing the security monitoring dashboard for your organization. 
+                    You are viewing the security monitoring dashboard for your organization.
                     This dashboard provides real-time insights into your security posture and threat status.
                 </p>
                 @if(auth()->user()->role === 'user')
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    <strong>User Access:</strong> You have read-only access to security metrics. 
+                    <strong>User Access:</strong> You have read-only access to security metrics.
                     For administrative functions, please contact your system administrator.
                 </div>
                 @endif
@@ -755,4 +757,4 @@
 
     @stack('scripts')
 </body>
-</html> 
+</html>
