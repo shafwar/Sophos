@@ -28,9 +28,9 @@ class RiskController extends Controller
 
         // Log satu contoh alert untuk debug mapping
         if (!empty($alerts)) {
-            \Log::info('Sample alert for export:', ['sample' => $alerts[0]]);
+            Log::info('Sample alert for export:', ['sample' => $alerts[0]]);
         } else {
-            \Log::info('No alerts found for export.');
+            Log::info('No alerts found for export.');
         }
 
         // Ensure alerts is an array
@@ -80,4 +80,4 @@ class RiskController extends Controller
 
         return implode("\n", $recommendations);
     }
-} 
+}

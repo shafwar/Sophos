@@ -2,11 +2,11 @@
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
         <!-- Brand -->
-        <a class="navbar-brand" href="{{ route('dashboard') }}">
+        <a class="navbar-brand d-flex align-items-center" href="{{ route('dashboard') }}">
             <i class="fas fa-shield-alt"></i>
-            <span>SIPANDI</span>
+            <span class="ms-2 me-3">SIPANDI</span>
+            <img src="https://pertagas.pertamina.com/Static/pertagas/common/images/logo-pertagas-white.png" alt="PERTAMINA GAS" style="height: 30px; object-fit: contain;">
         </a>
-
         <!-- Mobile Toggle -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -15,7 +15,7 @@
         <!-- Nav Items -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                
+
                 @if(auth()->user() && auth()->user()->role === 'admin')
                     <!-- Dashboards -->
                     <li class="nav-item dropdown">
@@ -85,7 +85,7 @@
                         </li>
                     </ul>
                 </li>
-                
+
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user"></i>
