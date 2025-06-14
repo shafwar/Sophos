@@ -120,4 +120,13 @@ Route::get('/debug-api', function() {
     // Admin: User List
     Route::get('/admin/user-list', [DashboardController::class, 'userList'])->name('admin.user-list');
     Route::delete('/admin/delete-user/{id}', [DashboardController::class, 'deleteUser'])->name('admin.delete-user');
+
+    // Export activity log user
+    Route::get('/activity-log/export', [DashboardController::class, 'exportUserLog'])->name('activity-log.export');
+
+    // History Data untuk user
+    Route::get('/history', [DashboardController::class, 'historyData'])->name('history.data');
+
+    // Export history data user
+    Route::get('/history/export', [DashboardController::class, 'exportHistoryData'])->name('history.export');
 });
