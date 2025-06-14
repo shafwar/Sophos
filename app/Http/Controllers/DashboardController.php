@@ -20,6 +20,10 @@ class DashboardController extends Controller
         $this->sophosApi = $sophosApi;
     }
 
+    /**
+     * Dashboard utama - Akses: Admin & User
+     * Menampilkan ringkasan data dan metrik keamanan
+     */
     public function index()
     {
         $user = Auth::user();
@@ -43,6 +47,10 @@ class DashboardController extends Controller
         abort(403);
     }
 
+    /**
+     * Overview dashboard - Akses: Admin & User
+     * Menampilkan gambaran umum sistem keamanan
+     */
     public function overview()
     {
         $user = Auth::user();
@@ -94,6 +102,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Analytics dashboard - Akses: Admin & User
+     * Menampilkan analisis dan statistik keamanan
+     */
     public function analytics()
     {
         $user = Auth::user();
@@ -223,6 +235,10 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * Get Alerts by Category - Akses: Admin & User
+     * Mendapatkan alert berdasarkan kategori
+     */
     public function getAlertsByCategory($category)
     {
         try {
@@ -259,6 +275,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Metrics - Akses: Admin & User
+     * Mendapatkan metrik keamanan
+     */
     public function getMetrics()
     {
         try {
@@ -276,6 +296,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Weekly Traffic Risk - Akses: Admin & User
+     * Mendapatkan data risiko traffic mingguan
+     */
     public function getWeeklyTrafficRisk()
     {
         try {
@@ -341,6 +365,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Traffic Risk Details - Akses: Admin & User
+     * Mendapatkan detail risiko traffic
+     */
     public function getTrafficRiskDetails($month, $level)
     {
         try {
@@ -378,6 +406,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Monthly Details - Akses: Admin & User
+     * Mendapatkan detail data bulanan
+     */
     public function getMonthlyDetails($month)
     {
         try {
@@ -497,6 +529,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Reports page - Akses: Admin & User
+     * Menampilkan laporan keamanan
+     */
     public function reports()
     {
         $user = Auth::user();
@@ -548,6 +584,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Activity Log - Akses: Admin
+     * Menampilkan log aktivitas semua user
+     */
     public function activityLog()
     {
         $user = Auth::user();
@@ -582,7 +622,10 @@ class DashboardController extends Controller
         return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins'));
     }
 
-    // Admin: Lihat user pending
+    /**
+     * Pending Users - Akses: Admin
+     * Menampilkan daftar user yang menunggu persetujuan
+     */
     public function pendingUsers()
     {
         $user = Auth::user();
@@ -591,7 +634,10 @@ class DashboardController extends Controller
         return view('admin_pending_users', compact('pendingUsers'));
     }
 
-    // Admin: Approve user
+    /**
+     * Approve User - Akses: Admin
+     * Menyetujui pendaftaran user baru
+     */
     public function approveUser($id)
     {
         $user = Auth::user();
@@ -608,7 +654,10 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'User approved!');
     }
 
-    // Admin: Decline user
+    /**
+     * Decline User - Akses: Admin
+     * Menolak pendaftaran user baru
+     */
     public function declineUser($id)
     {
         $user = Auth::user();
@@ -626,7 +675,10 @@ class DashboardController extends Controller
         return redirect()->back()->with('error', 'User declined!');
     }
 
-    // Ambil semua user untuk modal list user
+    /**
+     * User List - Akses: Admin
+     * Menampilkan daftar semua user
+     */
     public function userList()
     {
         $user = Auth::user();
@@ -635,7 +687,10 @@ class DashboardController extends Controller
         return response()->json($users);
     }
 
-    // Hapus user by id
+    /**
+     * Delete User - Akses: Admin
+     * Menghapus user dari sistem
+     */
     public function deleteUser($id)
     {
         $user = Auth::user();
@@ -648,6 +703,10 @@ class DashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Export User Log - Akses: User
+     * Mengekspor log aktivitas user yang login
+     */
     public function exportUserLog()
     {
         $user = Auth::user();
@@ -681,6 +740,10 @@ class DashboardController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * History Data - Akses: User
+     * Menampilkan riwayat risiko untuk user yang login
+     */
     public function historyData(Request $request)
     {
         $user = Auth::user();
@@ -752,6 +815,10 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Export History Data - Akses: User
+     * Mengekspor riwayat risiko user dalam format yang dipilih
+     */
     public function exportHistoryData(Request $request)
     {
         $user = Auth::user();
