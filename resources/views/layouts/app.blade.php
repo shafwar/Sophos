@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -530,6 +529,31 @@
                             <a class="nav-link" href="{{ route('admin.activity-log') }}">
                                 <i class="fas fa-list"></i>
                                 <span>Activity Log</span>
+                            </a>
+                        </li>
+                    @endif
+
+                    @if(auth()->user())
+                        <li class="nav-item">
+                            @if(auth()->user()->role === 'admin')
+                                <a class="nav-link" href="{{ route('admin.activity-log') }}">
+                                    <i class="fas fa-list"></i>
+                                    <span>Activity Log</span>
+                                </a>
+                            @else
+                                <a class="nav-link" href="{{ url('/admin/activity-log') }}">
+                                    <i class="fas fa-list"></i>
+                                    <span>Activity Log</span>
+                                </a>
+                            @endif
+                        </li>
+                    @endif
+
+                    @if(auth()->user() && auth()->user()->role === 'user')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('history.data') }}">
+                                <i class="fas fa-history"></i>
+                                <span>History Data</span>
                             </a>
                         </li>
                     @endif

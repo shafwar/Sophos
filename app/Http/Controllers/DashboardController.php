@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -499,12 +500,16 @@ class DashboardController extends Controller
     public function reports()
     {
         $user = Auth::user();
-        if ($user->role !== 'admin') abort(403);
         try {
             $computersData = $this->sophosApi->getComputers();
-
-            // Pastikan data valid
             $computers = collect($computersData['computers_list'] ?? []);
+            // Jika user biasa, filter hanya milik sendiri (berdasarkan nama user)
+            if ($user->role !== 'admin') {
+                $computers = $computers->filter(function ($comp) use ($user) {
+                    // Sesuaikan field 'logins' jika ingin filter berdasarkan email/ganti field
+                    return strtolower($comp['logins'] ?? '') === strtolower($user->name);
+                });
+            }
             $stats = $computersData['stats'] ?? [
                 'all' => 0,
                 'active' => 0,
@@ -513,8 +518,6 @@ class DashboardController extends Controller
                 'not_protected' => 0
             ];
             $computerGroups = $computers->pluck('group')->unique()->values()->all();
-
-            // Pagination
             $currentPage = request()->get('page', 1);
             $perPage = 15;
             $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -524,7 +527,6 @@ class DashboardController extends Controller
                 $currentPage,
                 ['path' => request()->url()]
             );
-
             return view('reports', [
                 'stats' => $stats,
                 'computers' => $paginated,
@@ -532,7 +534,6 @@ class DashboardController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Error in reports:', ['message' => $e->getMessage()]);
-            // Fallback jika error
             return view('reports', [
                 'stats' => [
                     'all' => 0,
@@ -547,33 +548,37 @@ class DashboardController extends Controller
         }
     }
 
-    // Tambahkan method untuk admin melihat activity log
     public function activityLog()
     {
         $user = Auth::user();
-        if ($user->role !== 'admin') abort(403);
-
-        // Statistik user
-        $totalUsers = \App\Models\User::count();
-        // Active users: user yang pernah login dalam 24 jam terakhir (butuh kolom last_login_at, fallback ke totalUsers jika tidak ada)
-        $activeUsers = \App\Models\User::count();
-        // Jika ada kolom last_login_at, gunakan baris di bawah:
-        // $activeUsers = \App\Models\User::whereNotNull('last_login_at')->where('last_login_at', '>=', now()->subDay())->count();
-
-        // Logins hari ini
-        $todaysLogins = DB::table('activity_logs')
-            ->where('activity', 'like', '%login%')
-            ->whereDate('created_at', now()->toDateString())
-            ->count();
-
-        // Recent activities
-        $logs = DB::table('activity_logs')
-            ->join('users', 'activity_logs.user_id', '=', 'users.id')
-            ->select('users.name as user_name', 'activity_logs.activity', 'activity_logs.created_at')
-            ->orderByDesc('activity_logs.created_at')
-            ->limit(10)
-            ->get();
-
+        // Jika admin, tampilkan semua log. Jika user, hanya log milik sendiri.
+        if ($user->role === 'admin') {
+            $totalUsers = \App\Models\User::count();
+            $activeUsers = \App\Models\User::count();
+            $todaysLogins = DB::table('activity_logs')
+                ->where('activity', 'like', '%login%')
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+            $logs = DB::table('activity_logs')
+                ->join('users', 'activity_logs.user_id', '=', 'users.id')
+                ->select('users.name as user_name', 'activity_logs.activity', 'activity_logs.created_at')
+                ->orderByDesc('activity_logs.created_at')
+                ->limit(50)
+                ->get();
+        } else {
+            $totalUsers = 1;
+            $activeUsers = 1;
+            $todaysLogins = DB::table('activity_logs')
+                ->where('activity', 'like', '%login%')
+                ->where('user_id', $user->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->count();
+            $logs = DB::table('activity_logs')
+                ->where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->limit(50)
+                ->get();
+        }
         return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins'));
     }
 
@@ -641,5 +646,186 @@ class DashboardController extends Controller
         }
         $target->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function exportUserLog()
+    {
+        $user = Auth::user();
+        $logs = \DB::table('activity_logs')
+            ->where('user_id', $user->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $filename = 'activity_log_' . strtolower(str_replace(' ', '_', $user->name)) . '_' . now()->format('Ymd_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $columns = ['Activity', 'Tanggal', 'Waktu'];
+
+        $callback = function() use ($logs, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            foreach ($logs as $log) {
+                $date = \Carbon\Carbon::parse($log->created_at);
+                fputcsv($file, [
+                    $log->activity,
+                    $date->format('Y-m-d'),
+                    $date->format('H:i:s'),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function historyData(Request $request)
+    {
+        $user = Auth::user();
+        $name = $user->name;
+        $riskLevel = $request->get('level');
+        $month = $request->get('month');
+        $search = $request->get('search');
+        $tanggalAwal = $request->get('tanggal_awal');
+        $tanggalAkhir = $request->get('tanggal_akhir');
+
+        // Ambil data risk dari API
+        $sophosApi = app(\App\Services\SophosApiService::class);
+        $allRisks = $sophosApi->getAllAlerts();
+
+        // Filter berdasarkan nama user (person['name']) - longgar, gunakan str_contains
+        $userRisks = collect($allRisks)->filter(function($risk) use ($name) {
+            $personName = isset($risk['person']['name']) ? strtolower($risk['person']['name']) : null;
+            $userName = strtolower(trim($name));
+            return $personName && $userName && str_contains($personName, $userName);
+        });
+
+        // Filter risk level jika ada
+        if ($riskLevel) {
+            $userRisks = $userRisks->filter(function($risk) use ($riskLevel) {
+                return strtolower($risk['severity'] ?? '') === strtolower($riskLevel);
+            });
+        }
+
+        // Filter bulan jika ada
+        if ($month) {
+            $userRisks = $userRisks->filter(function($risk) use ($month) {
+                if (!isset($risk['raisedAt'])) return false;
+                return \Carbon\Carbon::parse($risk['raisedAt'])->format('Y-m') === $month;
+            });
+        }
+
+        // Filter search jika ada
+        if ($search) {
+            $userRisks = $userRisks->filter(function($risk) use ($search) {
+                return stripos($risk['description'] ?? '', $search) !== false;
+            });
+        }
+
+        // Filter tanggal jika ada
+        if ($tanggalAwal && $tanggalAkhir) {
+            $userRisks = $userRisks->filter(function($risk) use ($tanggalAwal, $tanggalAkhir) {
+                if (!isset($risk['raisedAt'])) return false;
+                $date = \Carbon\Carbon::parse($risk['raisedAt'])->format('Y-m-d');
+                return $date >= $tanggalAwal && $date <= $tanggalAkhir;
+            });
+        }
+
+        // Ambil daftar bulan unik untuk filter
+        $months = $userRisks->pluck('raisedAt')->filter()->map(function($date) {
+            return \Carbon\Carbon::parse($date)->format('Y-m');
+        })->unique()->values();
+
+        // DEBUG: Log contoh data risk mentah dari API
+        \Log::info('Contoh data risk dari API:', [
+            'sample' => array_slice($allRisks, 0, 3)
+        ]);
+
+        return view('history', [
+            'risks' => $userRisks->values(),
+            'months' => $months,
+            'selectedLevel' => $riskLevel,
+            'selectedMonth' => $month,
+            'search' => $search,
+        ]);
+    }
+
+    public function exportHistoryData(Request $request)
+    {
+        $user = Auth::user();
+        $name = $user->name;
+        $riskLevel = $request->get('level');
+        $month = $request->get('month');
+        $search = $request->get('search');
+        $format = $request->get('format', 'csv');
+        $tanggalAwal = $request->get('tanggal_awal');
+        $tanggalAkhir = $request->get('tanggal_akhir');
+
+        // Ambil data risk dari API
+        $sophosApi = app(\App\Services\SophosApiService::class);
+        $allRisks = $sophosApi->getAllAlerts();
+
+        // Filter berdasarkan nama user (str_contains)
+        $userRisks = collect($allRisks)->filter(function($risk) use ($name) {
+            $personName = isset($risk['person']['name']) ? strtolower($risk['person']['name']) : null;
+            $userName = strtolower(trim($name));
+            return $personName && $userName && str_contains($personName, $userName);
+        });
+        if ($riskLevel) {
+            $userRisks = $userRisks->filter(function($risk) use ($riskLevel) {
+                return strtolower($risk['severity'] ?? '') === strtolower($riskLevel);
+            });
+        }
+        if ($month) {
+            $userRisks = $userRisks->filter(function($risk) use ($month) {
+                if (!isset($risk['raisedAt'])) return false;
+                return \Carbon\Carbon::parse($risk['raisedAt'])->format('Y-m') === $month;
+            });
+        }
+        if ($search) {
+            $userRisks = $userRisks->filter(function($risk) use ($search) {
+                return stripos($risk['description'] ?? '', $search) !== false;
+            });
+        }
+        if ($tanggalAwal && $tanggalAkhir) {
+            $userRisks = $userRisks->filter(function($risk) use ($tanggalAwal, $tanggalAkhir) {
+                if (!isset($risk['raisedAt'])) return false;
+                $date = \Carbon\Carbon::parse($risk['raisedAt'])->format('Y-m-d');
+                return $date >= $tanggalAwal && $date <= $tanggalAkhir;
+            });
+        }
+        $userRisks = $userRisks->values();
+
+        // Export CSV
+        if ($format === 'csv') {
+            $filename = 'history_risk_' . strtolower(str_replace(' ', '_', $user->name)) . '_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+            $columns = ['ID', 'Severity', 'Date', 'Category', 'Description'];
+            $callback = function() use ($userRisks, $columns) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+                foreach ($userRisks as $risk) {
+                    fputcsv($file, [
+                        $risk['id'] ?? '',
+                        $risk['severity'] ?? '',
+                        $risk['raisedAt'] ?? '',
+                        $risk['category'] ?? '',
+                        $risk['description'] ?? '',
+                    ]);
+                }
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
+        }
+        // Export XLSX/PDF
+        $export = new \App\Exports\RiskExport($userRisks->toArray());
+        $filename = 'history_risk_' . strtolower(str_replace(' ', '_', $user->name)) . '_' . now()->format('Ymd_His') . '.' . $format;
+        $excelFormat = $format === 'pdf' ? \Maatwebsite\Excel\Excel::DOMPDF : \Maatwebsite\Excel\Excel::XLSX;
+        return \Maatwebsite\Excel\Facades\Excel::download($export, $filename, $excelFormat);
     }
 }
