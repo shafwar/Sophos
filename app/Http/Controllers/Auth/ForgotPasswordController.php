@@ -16,7 +16,7 @@ class ForgotPasswordController extends Controller
      */
     public function showLinkRequestForm()
     {
-        return view('auth.passwords.email'); // Ganti dengan file Blade untuk meminta email reset
+        return view('password.email'); // Mengubah pemanggilan view ke lokasi yang benar
     }
 
     /**
