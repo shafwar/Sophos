@@ -36,6 +36,7 @@
 
 <div class="container mt-5">
     <!-- Summary Metrics -->
+    @if(auth()->user()->role === 'admin')
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
             <div class="metric-card" onclick="fetchDetailData('All Risk')">
@@ -82,6 +83,54 @@
             </div>
         </div>
     </div>
+    @else
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="metric-card" style="pointer-events: none; cursor: default;">
+                <i class="fas fa-chart-line fa-2x" style="color: var(--primary-color)"></i>
+                <div class="metric-value">{{ $riskData['total'] ?? 0 }}</div>
+                <div class="metric-label">Total Alerts</div>
+                <div class="metric-trend {{ isset($riskData['weeklyChange']['total']) && str_contains($riskData['weeklyChange']['total'], '-') ? 'trend-down' : 'trend-up' }}">
+                    <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['total']) && str_contains($riskData['weeklyChange']['total'], '-') ? 'down' : 'up' }}"></i>
+                    {{ $riskData['weeklyChange']['total'] ?? '0% this week' }}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="metric-card" style="pointer-events: none; cursor: default;">
+                <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--danger-color)"></i>
+                <div class="metric-value">{{ $riskData['high'] ?? 0 }}</div>
+                <div class="metric-label">High Risk</div>
+                <div class="metric-trend {{ isset($riskData['weeklyChange']['high']) && str_contains($riskData['weeklyChange']['high'], '-') ? 'trend-down' : 'trend-up' }}">
+                    <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['high']) && str_contains($riskData['weeklyChange']['high'], '-') ? 'down' : 'up' }}"></i>
+                    {{ $riskData['weeklyChange']['high'] ?? '0% this week' }}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="metric-card" style="pointer-events: none; cursor: default;">
+                <i class="fas fa-exclamation-circle fa-2x" style="color: var(--warning-color)"></i>
+                <div class="metric-value">{{ $riskData['medium'] ?? 0 }}</div>
+                <div class="metric-label">Medium Risk</div>
+                <div class="metric-trend {{ isset($riskData['weeklyChange']['medium']) && str_contains($riskData['weeklyChange']['medium'], '-') ? 'trend-down' : 'trend-up' }}">
+                    <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['medium']) && str_contains($riskData['weeklyChange']['medium'], '-') ? 'down' : 'up' }}"></i>
+                    {{ $riskData['weeklyChange']['medium'] ?? '0% this week' }}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+            <div class="metric-card" style="pointer-events: none; cursor: default;">
+                <i class="fas fa-info-circle fa-2x" style="color: var(--success-color)"></i>
+                <div class="metric-value">{{ $riskData['low'] ?? 0 }}</div>
+                <div class="metric-label">Low Risk</div>
+                <div class="metric-trend {{ isset($riskData['weeklyChange']['low']) && str_contains($riskData['weeklyChange']['low'], '-') ? 'trend-down' : 'trend-up' }}">
+                    <i class="fas fa-arrow-{{ isset($riskData['weeklyChange']['low']) && str_contains($riskData['weeklyChange']['low'], '-') ? 'down' : 'up' }}"></i>
+                    {{ $riskData['weeklyChange']['low'] ?? '0% this week' }}
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Risk Level Charts -->
     <div class="row">
@@ -762,6 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Functions
+    @if(auth()->user()->role === 'admin')
     window.fetchDetailData = function(category) {
         const tableBody = document.getElementById('riskDetailTableBody');
         const modalTitle = document.getElementById('riskDetailModalLabel');
@@ -840,6 +890,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             });
     };
+    @endif
 
     function showMonthlyDetails(month) {
         const tableBody = document.getElementById('alertDetailTableBody');
@@ -1396,6 +1447,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial high risk check
     const initialHighRiskCount = parseInt(document.getElementById('highRiskChart').getAttribute('data-value') || '0');
     checkHighRisk(initialHighRiskCount);
+
+    // Pada bagian JS, nonaktifkan event fetchDetailData dan onClick chart jika user bukan admin
+    @if(auth()->user()->role !== 'admin')
+    window.fetchDetailData = function() { return false; };
+    // Nonaktifkan onClick chart
+    Chart.defaults.plugins.legend.onClick = null;
+    // Atau jika ada event onClick di chart, override jadi kosong
+    if (window.trafficChart) {
+        window.trafficChart.options.onClick = null;
+    }
+    @endif
 });
 </script>
 @endpush
