@@ -20,6 +20,10 @@ class DashboardController extends Controller
         $this->sophosApi = $sophosApi;
     }
 
+    /**
+     * Dashboard utama - Akses: Admin & User
+     * Menampilkan ringkasan data dan metrik keamanan
+     */
     public function index()
     {
         $user = Auth::user();
@@ -32,17 +36,42 @@ class DashboardController extends Controller
         ]);
 
         // Ambil data metrics
-        $metrics = $this->sophosApi->getMetrics() ?? $this->getDefaultMetrics();
-
         if ($user->role === 'user') {
+            // Ambil semua data alert dari API
+            $allAlerts = $this->sophosApi->getAllAlerts();
+            $userName = strtolower(trim($user->name));
+            $userAlerts = collect($allAlerts)->filter(function($alert) use ($userName) {
+                $desc = strtolower($alert['description'] ?? '');
+                // Cek apakah nama user ada di path/file description
+                return $userName && str_contains($desc, $userName);
+            });
+            // Hitung metrik hanya dari $userAlerts
+            $metrics = [
+                'total' => $userAlerts->count(),
+                'high' => $userAlerts->where('severity', 'high')->count(),
+                'medium' => $userAlerts->where('severity', 'medium')->count(),
+                'low' => $userAlerts->where('severity', 'low')->count(),
+                'weeklyChange' => [
+                    'total' => '0% this week',
+                    'high' => '0% this week',
+                    'medium' => '0% this week',
+                    'low' => '0% this week'
+                ]
+            ];
             return view('dashboard', ['riskData' => $metrics]);
         }
+        // Admin: tetap tampilkan semua data
         if ($user->role === 'admin') {
+            $metrics = $this->sophosApi->getMetrics() ?? $this->getDefaultMetrics();
             return view('admin_dashboard', ['riskData' => $metrics]);
         }
         abort(403);
     }
 
+    /**
+     * Overview dashboard - Akses: Admin & User
+     * Menampilkan gambaran umum sistem keamanan
+     */
     public function overview()
     {
         $user = Auth::user();
@@ -94,6 +123,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Analytics dashboard - Akses: Admin & User
+     * Menampilkan analisis dan statistik keamanan
+     */
     public function analytics()
     {
         $user = Auth::user();
@@ -223,6 +256,10 @@ class DashboardController extends Controller
         ];
     }
 
+    /**
+     * Get Alerts by Category - Akses: Admin & User
+     * Mendapatkan alert berdasarkan kategori
+     */
     public function getAlertsByCategory($category)
     {
         try {
@@ -259,6 +296,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Metrics - Akses: Admin & User
+     * Mendapatkan metrik keamanan
+     */
     public function getMetrics()
     {
         try {
@@ -276,20 +317,32 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Weekly Traffic Risk - Akses: Admin & User
+     * Mendapatkan data risiko traffic mingguan
+     */
     public function getWeeklyTrafficRisk()
     {
         try {
+            $user = Auth::user();
             $sophosService = app(SophosApiService::class);
             $alerts = $sophosService->getAllAlerts();
 
-            Log::info('Alerts received:', ['count' => count($alerts)]);
+            // Jika user biasa, filter hanya data miliknya
+            if ($user->role !== 'admin') {
+                $userName = strtolower(trim($user->name));
+                $alerts = collect($alerts)->filter(function($alert) use ($userName) {
+                    $desc = strtolower($alert['description'] ?? '');
+                    return $userName && str_contains($desc, $userName);
+                });
+            }
 
             // Daftar bulan Jan–Des
             $allMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
             // Group alerts by month and risk level
             $monthlyData = collect($alerts)->groupBy(function ($alert) {
-                return Carbon::parse($alert['raisedAt'])->format('M');
+                return \Carbon\Carbon::parse($alert['raisedAt'])->format('M');
             })->map(function ($monthAlerts) {
                 return [
                     'highRisk' => $monthAlerts->where('severity', 'high')->count(),
@@ -313,11 +366,11 @@ class DashboardController extends Controller
             });
             if ($hasData === 0) {
                 $chartData = [
-                    ['month' => 'Jan', 'highRisk' => 2, 'mediumRisk' => 1, 'lowRisk' => 3],
-                    ['month' => 'Feb', 'highRisk' => 1, 'mediumRisk' => 2, 'lowRisk' => 2],
-                    ['month' => 'Mar', 'highRisk' => 0, 'mediumRisk' => 1, 'lowRisk' => 4],
-                    ['month' => 'Apr', 'highRisk' => 3, 'mediumRisk' => 0, 'lowRisk' => 1],
-                    ['month' => 'May', 'highRisk' => 1, 'mediumRisk' => 1, 'lowRisk' => 2],
+                    ['month' => 'Jan', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Feb', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Mar', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'Apr', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
+                    ['month' => 'May', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
                     ['month' => 'Jun', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
                     ['month' => 'Jul', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
                     ['month' => 'Aug', 'highRisk' => 0, 'mediumRisk' => 0, 'lowRisk' => 0],
@@ -333,7 +386,7 @@ class DashboardController extends Controller
                 'data' => $chartData
             ]);
         } catch (\Exception $e) {
-            Log::error('Error fetching traffic risk data: ' . $e->getMessage());
+            \Log::error('Error fetching traffic risk data: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch traffic risk data'
@@ -341,6 +394,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Traffic Risk Details - Akses: Admin & User
+     * Mendapatkan detail risiko traffic
+     */
     public function getTrafficRiskDetails($month, $level)
     {
         try {
@@ -378,6 +435,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get Monthly Details - Akses: Admin & User
+     * Mendapatkan detail data bulanan
+     */
     public function getMonthlyDetails($month)
     {
         try {
@@ -497,6 +558,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Reports page - Akses: Admin & User
+     * Menampilkan laporan keamanan
+     */
     public function reports()
     {
         $user = Auth::user();
@@ -548,6 +613,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Activity Log - Akses: Admin
+     * Menampilkan log aktivitas semua user
+     */
     public function activityLog()
     {
         $user = Auth::user();
@@ -582,7 +651,10 @@ class DashboardController extends Controller
         return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins'));
     }
 
-    // Admin: Lihat user pending
+    /**
+     * Pending Users - Akses: Admin
+     * Menampilkan daftar user yang menunggu persetujuan
+     */
     public function pendingUsers()
     {
         $user = Auth::user();
@@ -591,7 +663,10 @@ class DashboardController extends Controller
         return view('admin_pending_users', compact('pendingUsers'));
     }
 
-    // Admin: Approve user
+    /**
+     * Approve User - Akses: Admin
+     * Menyetujui pendaftaran user baru
+     */
     public function approveUser($id)
     {
         $user = Auth::user();
@@ -608,7 +683,10 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'User approved!');
     }
 
-    // Admin: Decline user
+    /**
+     * Decline User - Akses: Admin
+     * Menolak pendaftaran user baru
+     */
     public function declineUser($id)
     {
         $user = Auth::user();
@@ -626,7 +704,10 @@ class DashboardController extends Controller
         return redirect()->back()->with('error', 'User declined!');
     }
 
-    // Ambil semua user untuk modal list user
+    /**
+     * User List - Akses: Admin
+     * Menampilkan daftar semua user
+     */
     public function userList()
     {
         $user = Auth::user();
@@ -635,7 +716,10 @@ class DashboardController extends Controller
         return response()->json($users);
     }
 
-    // Hapus user by id
+    /**
+     * Delete User - Akses: Admin
+     * Menghapus user dari sistem
+     */
     public function deleteUser($id)
     {
         $user = Auth::user();
@@ -648,6 +732,10 @@ class DashboardController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Export User Log - Akses: User
+     * Mengekspor log aktivitas user yang login
+     */
     public function exportUserLog()
     {
         $user = Auth::user();
@@ -681,6 +769,10 @@ class DashboardController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
+    /**
+     * History Data - Akses: User
+     * Menampilkan riwayat risiko untuk user yang login
+     */
     public function historyData(Request $request)
     {
         $user = Auth::user();
@@ -695,11 +787,11 @@ class DashboardController extends Controller
         $sophosApi = app(\App\Services\SophosApiService::class);
         $allRisks = $sophosApi->getAllAlerts();
 
-        // Filter berdasarkan nama user (person['name']) - longgar, gunakan str_contains
-        $userRisks = collect($allRisks)->filter(function($risk) use ($name) {
-            $personName = isset($risk['person']['name']) ? strtolower($risk['person']['name']) : null;
-            $userName = strtolower(trim($name));
-            return $personName && $userName && str_contains($personName, $userName);
+        // Filter berdasarkan nama user di description (case-insensitive)
+        $userName = strtolower(trim($name));
+        $userRisks = collect($allRisks)->filter(function($risk) use ($userName) {
+            $desc = strtolower($risk['description'] ?? '');
+            return $userName && str_contains($desc, $userName);
         });
 
         // Filter risk level jika ada
@@ -752,6 +844,10 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Export History Data - Akses: User
+     * Mengekspor riwayat risiko user dalam format yang dipilih
+     */
     public function exportHistoryData(Request $request)
     {
         $user = Auth::user();
@@ -767,11 +863,11 @@ class DashboardController extends Controller
         $sophosApi = app(\App\Services\SophosApiService::class);
         $allRisks = $sophosApi->getAllAlerts();
 
-        // Filter berdasarkan nama user (str_contains)
-        $userRisks = collect($allRisks)->filter(function($risk) use ($name) {
-            $personName = isset($risk['person']['name']) ? strtolower($risk['person']['name']) : null;
-            $userName = strtolower(trim($name));
-            return $personName && $userName && str_contains($personName, $userName);
+        // Filter berdasarkan nama user di description (case-insensitive)
+        $userName = strtolower(trim($name));
+        $userRisks = collect($allRisks)->filter(function($risk) use ($userName) {
+            $desc = strtolower($risk['description'] ?? '');
+            return $userName && str_contains($desc, $userName);
         });
         if ($riskLevel) {
             $userRisks = $userRisks->filter(function($risk) use ($riskLevel) {
