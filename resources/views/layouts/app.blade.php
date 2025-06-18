@@ -24,6 +24,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         :root {
             --primary-color: #003B7B;
@@ -569,14 +571,6 @@
                                 @if($pendingCount > 0)
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $pendingCount }}</span>
                                 @endif
-                            </a>
-                        </li>
-
-                        <!-- Activity Log (khusus admin) -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.activity-log') }}">
-                                <i class="fas fa-list"></i>
-                                <span>Activity Log</span>
                             </a>
                         </li>
                     @endif

@@ -86,7 +86,7 @@
     @else
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="metric-card" style="pointer-events: none; cursor: default;">
+            <div class="metric-card" onclick="fetchUserDetailData('All Risk')">
                 <i class="fas fa-chart-line fa-2x" style="color: var(--primary-color)"></i>
                 <div class="metric-value">{{ $riskData['total'] ?? 0 }}</div>
                 <div class="metric-label">Total Alerts</div>
@@ -97,7 +97,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="metric-card" style="pointer-events: none; cursor: default;">
+            <div class="metric-card" onclick="fetchUserDetailData('High Risk')">
                 <i class="fas fa-exclamation-triangle fa-2x" style="color: var(--danger-color)"></i>
                 <div class="metric-value">{{ $riskData['high'] ?? 0 }}</div>
                 <div class="metric-label">High Risk</div>
@@ -108,7 +108,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="metric-card" style="pointer-events: none; cursor: default;">
+            <div class="metric-card" onclick="fetchUserDetailData('Medium Risk')">
                 <i class="fas fa-exclamation-circle fa-2x" style="color: var(--warning-color)"></i>
                 <div class="metric-value">{{ $riskData['medium'] ?? 0 }}</div>
                 <div class="metric-label">Medium Risk</div>
@@ -119,7 +119,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
-            <div class="metric-card" style="pointer-events: none; cursor: default;">
+            <div class="metric-card" onclick="fetchUserDetailData('Low Risk')">
                 <i class="fas fa-info-circle fa-2x" style="color: var(--success-color)"></i>
                 <div class="metric-value">{{ $riskData['low'] ?? 0 }}</div>
                 <div class="metric-label">Low Risk</div>
@@ -674,6 +674,38 @@
 
 @push('scripts')
 <script>
+// PASTIKAN INI DI PALING ATAS <script> DAN HANYA ADA SATU
+function getSeverityClass(severity) {
+    switch((severity || '').toLowerCase()) {
+        case 'high': return 'badge-high bg-danger';
+        case 'medium': return 'badge-medium bg-warning';
+        case 'low': return 'badge-low bg-success';
+        default: return 'badge-secondary bg-secondary';
+    }
+}
+
+// Ensure this function is in the global scope
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    try {
+        const date = new Date(dateString);
+        if (!isNaN(date)) {
+             return date.toLocaleString();
+        }
+    } catch (e) {
+        // Fallback if parsing fails
+    }
+    try {
+        const date = new Date(dateString.replace(/[-]/g, '/'));
+        if (!isNaN(date)) {
+             return date.toLocaleString();
+        }
+    } catch (e) {
+        return '-';
+    }
+    return '-';
+}
+
 // Dashboard-specific JavaScript code
 document.addEventListener('DOMContentLoaded', function() {
     // Data storage variables
@@ -1078,36 +1110,6 @@ document.addEventListener('DOMContentLoaded', function() {
         eventDetailsModal.show();
     }
 
-    function formatDate(dateString) {
-        if (!dateString) return '-';
-        try {
-            const date = new Date(dateString);
-            if (!isNaN(date)) {
-                 return date.toLocaleString();
-            }
-        } catch (e) {
-            // Fallback if parsing fails
-        }
-        try {
-            const date = new Date(dateString.replace(/[-]/g, '/'));
-            if (!isNaN(date)) {
-                 return date.toLocaleString();
-            }
-        } catch (e) {
-            return '-';
-        }
-        return '-';
-    }
-
-    function getSeverityClass(severity) {
-        switch(severity?.toLowerCase()) {
-            case 'high': return 'badge-high bg-danger';
-            case 'medium': return 'badge-medium bg-warning';
-            case 'low': return 'badge-low bg-success';
-            default: return 'badge-secondary bg-secondary';
-        }
-    }
-
     function toggleRiskFilter(riskType) {
         activeFilters[riskType] = !activeFilters[riskType];
 
@@ -1459,6 +1461,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     @endif
 });
+
+function fetchUserDetailData(category) {
+    const tableBody = document.getElementById('riskDetailTableBody');
+    const modalTitle = document.getElementById('riskDetailModalLabel');
+    modalTitle.textContent = `Alert Details - ${category}`;
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="text-center">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+    const riskModal = new bootstrap.Modal(document.getElementById('riskDetailModal'));
+    riskModal.show();
+    fetch(`/user-alerts/${encodeURIComponent(category)}`)
+        .then(response => response.json())
+        .then(response => {
+            tableBody.innerHTML = '';
+            const alerts = response.data || [];
+            if (!alerts.length) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No data found</td></tr>`;
+                return;
+            }
+            alerts.forEach((item, index) => {
+                const row = document.createElement('tr');
+                const severityClass = getSeverityClass(item.severity);
+                row.innerHTML = `
+                    <td class="text-muted small">${item.id || '-'}</td>
+                    <td>${item.category || '-'}</td>
+                    <td class="description-cell">${item.description?.split('\n')[0] || '-'}</td>
+                    <td><span class="badge ${severityClass}">${item.severity?.toUpperCase() || '-'}</span></td>
+                    <td class="small">${formatDate(item.raisedAt || item.created_at)}</td>
+                    <td><button type="button" class="btn btn-sm btn-info view-details">View Details</button></td>
+                `;
+                const viewButton = row.querySelector('.view-details');
+                viewButton.addEventListener('click', () => showEventDetails(item));
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger"><div class="alert alert-danger mb-0"><strong>Error:</strong> An error occurred while fetching the data.</div></td></tr>`;
+            console.error('Error:', error);
+        });
+}
 </script>
 @endpush
 @endsection
