@@ -924,4 +924,85 @@ class DashboardController extends Controller
         $excelFormat = $format === 'pdf' ? \Maatwebsite\Excel\Excel::DOMPDF : \Maatwebsite\Excel\Excel::XLSX;
         return \Maatwebsite\Excel\Facades\Excel::download($export, $filename, $excelFormat);
     }
+
+    public function getUserAlerts(Request $request)
+    {
+        $user = Auth::user();
+        $category = $request->input('category');
+        $allAlerts = $this->sophosApi->getAllAlerts();
+        if (!$allAlerts || !is_array($allAlerts)) {
+            return response()->json(['alerts' => []], 200);
+        }
+        $userName = strtolower(trim($user->name));
+        $userAlerts = collect($allAlerts)->filter(function($alert) use ($userName) {
+            $desc = strtolower($alert['description'] ?? '');
+            return $userName && str_contains($desc, $userName);
+        });
+        if ($category && $category !== 'All Risk') {
+            $severity = strtolower(explode(' ', $category)[0]);
+            $userAlerts = $userAlerts->where('severity', $severity);
+        }
+        // Sort by date desc
+        $userAlerts = $userAlerts->sortByDesc(function($alert) {
+            return $alert['created_at'] ?? $alert['raisedAt'] ?? '';
+        })->values();
+
+        // Map agar field selalu ada
+        $alerts = $userAlerts->map(function($alert) {
+            return [
+                'id' => $alert['id'] ?? '-',
+                'category' => $alert['category'] ?? '-',
+                'description' => $alert['description'] ?? '-',
+                'severity' => $alert['severity'] ?? '-',
+                'raisedAt' => $alert['raisedAt'] ?? ($alert['created_at'] ?? '-'),
+                'created_at' => $alert['created_at'] ?? ($alert['raisedAt'] ?? '-'),
+            ];
+        })->all();
+
+        return response()->json(['alerts' => $alerts], 200);
+    }
+
+    public function getUserAlertsByCategory($category)
+    {
+        $user = Auth::user();
+        $allAlerts = $this->sophosApi->getAllAlerts();
+        \Log::info('User Alert Debug', [
+            'user' => $user->name,
+            'category' => $category,
+            'sample_alert' => is_array($allAlerts) ? array_slice($allAlerts, 0, 2) : $allAlerts
+        ]);
+        if (!$allAlerts || !is_array($allAlerts)) {
+            return response()->json(['data' => [], 'debug' => 'No alerts from API'], 200);
+        }
+        $userName = strtolower(trim($user->name));
+        $userAlerts = collect($allAlerts)->filter(function($alert) use ($userName) {
+            $desc = strtolower($alert['description'] ?? '');
+            return $userName && str_contains($desc, $userName);
+        });
+        \Log::info('User Alert Debug', [
+            'filtered_count' => $userAlerts->count(),
+            'filtered_sample' => $userAlerts->slice(0,2)->values()
+        ]);
+        if ($category && strtolower($category) !== 'all risk') {
+            $severity = strtolower(explode(' ', $category)[0]);
+            $userAlerts = $userAlerts->where('severity', $severity);
+        }
+        $userAlerts = $userAlerts->sortByDesc(function($alert) {
+            return $alert['created_at'] ?? $alert['raisedAt'] ?? '';
+        })->values();
+        $alerts = $userAlerts->map(function($alert) {
+            return [
+                'id' => $alert['id'] ?? '-',
+                'category' => $alert['category'] ?? '-',
+                'description' => $alert['description'] ?? '-',
+                'severity' => $alert['severity'] ?? '-',
+                'raisedAt' => $alert['raisedAt'] ?? ($alert['created_at'] ?? '-'),
+                'created_at' => $alert['created_at'] ?? ($alert['raisedAt'] ?? '-'),
+            ];
+        })->all();
+        if (empty($alerts)) {
+            return response()->json(['data' => [], 'debug' => 'No user alerts found after filter'], 200);
+        }
+        return response()->json(['data' => $alerts], 200);
+    }
 }

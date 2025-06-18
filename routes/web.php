@@ -129,4 +129,10 @@ Route::get('/debug-api', function() {
 
     // Export history data user
     Route::get('/history/export', [DashboardController::class, 'exportHistoryData'])->name('history.export');
+
+    // New route for getting user alerts
+    Route::get('/dashboard/user-alerts', [DashboardController::class, 'getUserAlerts'])->name('dashboard.user-alerts');
+
+    // New route for getting user alerts by category
+    Route::get('/user-alerts/{category}', [DashboardController::class, 'getUserAlertsByCategory'])->name('user-alerts.by-category');
 });
