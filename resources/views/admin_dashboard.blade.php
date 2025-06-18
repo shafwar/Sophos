@@ -1251,43 +1251,32 @@
     </div>
 </div>
 
-    <!-- Footer -->
-    <footer class="mt-5" style="background: #1b258f; color: #fff; padding: 0;">
+       <!-- Footer -->
+       <footer class="mt-5" style="background: #1b258f; color: #fff; padding: 0;">
     <div class="container-fluid px-0">
-        <div class="row g-0" style="background: #003B7B;">
-            <div class="col-md-6 p-4">
-    <div class="d-flex flex-row w-100">
-        <div style="width: 48%;">
-            <h6 class="fw-bold mb-3">KANTOR PUSAT</h6>
-            <div>
-                Grha Pertamina,<br>
-                Pertamax Tower, Lantai 20 - 23<br>
-                Jl. Medan Merdeka Timur No. 11-13<br>
-                Jakarta Pusat 10110
+        <div class="row g-0 px-5" style="background: #1b258f; align-items: center;">
+            <div class="col-md-4 p-4">
+                <h5 class="fw-bold mb-3 fs-5">KANTOR PUSAT</h5>
+                <div style="font-size: 0.95rem; line-height: 1.6;">
+                    Grha Pertamina,<br>
+                    Pertamax Tower, Lantai 20 - 23<br>
+                    Jl. Medan Merdeka Timur No. 11-13<br>
+                    Jakarta Pusat 10110
+                </div>
+                <div class="mt-3" style="font-size: 0.95rem; line-height: 1.6;">
+                    <i class="fas fa-phone-alt me-2"></i>+62 21 31906825<br>
+                    <i class="fas fa-phone-alt me-2"></i>+62 21 31906831
+                </div>
             </div>
-            <div class="mt-3">
-                <i class="fas fa-phone-alt me-2"></i>+62 21 31906825<br>
-                <i class="fas fa-phone-alt me-2"></i>+62 21 31906831
+            <div class="col-md-4 p-4 text-center d-flex flex-column align-items-center justify-content-center">
+                <h6 class="text-white mb-2">Secure Monitoring</h6>
+                <small class="text-white-50">Protecting your digital assets</small>
             </div>
-        </div>
-
-        <!-- Google Maps -->
-        <div style="width: 52%; padding-left: -10rem;">
-            <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d991.9112914572228!2d106.83148526955105!3d-6.176173699382306!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5cc67d4d3c9%3A0xb50dc574309d2d44!2sPertamina!5e0!3m2!1sen!2sid!4v1716712345678"
-                width="100%" height="180" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-    </div>
-</div>
-
-
-            <!-- Spacer -->
-            <div class="col-md-3 p-4"></div>
-
-            <!-- Logo Pertamina Gas -->
-            <div class="col-md-3 d-flex align-items-center justify-content-end pe-5 p-4">
-                <img src="https://pertagas.pertamina.com/Static/pertagas/common/images/logo-pertagas-white.png" alt="PERTAMINA GAS" style="max-width: 270px;">
+            <div class="col-md-4 p-4 d-flex align-items-center justify-content-end">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d991.9112914572228!2d106.83148526955105!3d-6.176173699382306!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5cc67d4d3c9%3A0xb50dc574309d2d44!2sPertamina!5e0!3m2!1sen!2sid!4v1716712345678"
+                    width="300" height="180" style="border:0; border-radius: 8px; max-width:100%;" allowfullscreen="" loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
         </div>
     </div>
