@@ -571,14 +571,6 @@
                                 @endif
                             </a>
                         </li>
-
-                        <!-- Activity Log (khusus admin) -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('admin.activity-log') }}">
-                                <i class="fas fa-list"></i>
-                                <span>Activity Log</span>
-                            </a>
-                        </li>
                     @endif
 
                     @if(auth()->user())
