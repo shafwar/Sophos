@@ -464,6 +464,54 @@
         footer {
             flex-shrink: 0;
         }
+
+        /* Modal Animasi & Blue Theme */
+        #logoutConfirmModal .modal-content {
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(27, 37, 143, 0.18);
+            animation: modalFadeIn 0.45s cubic-bezier(0.4,0,0.2,1);
+        }
+        #logoutConfirmModal .modal-header {
+            background: linear-gradient(90deg, #1b258f 80%, #4fc3f7 100%);
+            color: #fff;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            border-bottom: none;
+            box-shadow: 0 2px 8px rgba(27,37,143,0.08);
+        }
+        #logoutConfirmModal .modal-footer {
+            border-top: none;
+            background: #f4f7fc;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+        }
+        #logoutConfirmModal .btn-primary, #logoutConfirmModal .btn-primary:focus {
+            background: linear-gradient(90deg, #1b258f 80%, #4fc3f7 100%);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(27,37,143,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        #logoutConfirmModal .btn-primary:hover {
+            background: #4fc3f7;
+            color: #1b258f;
+            box-shadow: 0 4px 16px rgba(27,37,143,0.18);
+        }
+        #logoutConfirmModal .btn-secondary {
+            background: #e3eafc;
+            color: #1b258f;
+            border: none;
+            font-weight: 500;
+        }
+        #logoutConfirmModal .btn-secondary:hover {
+            background: #c7d6f7;
+            color: #1b258f;
+        }
+        @keyframes modalFadeIn {
+            0% { opacity: 0; transform: translateY(40px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
     </style>
 
     @stack('styles')
@@ -595,9 +643,9 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                                     @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
+                                    <button type="button" class="dropdown-item text-danger" id="logoutBtn">
                                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                                     </button>
                                 </form>
@@ -698,6 +746,29 @@
         </div>
     </div>
 
+    <!-- Modal Konfirmasi Logout (Blue Themed & Animated) -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="logoutConfirmModalLabel"><i class="fas fa-sign-out-alt me-2"></i>Konfirmasi Logout</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-0" style="font-size:1.1rem; color:#1b258f; font-weight:500;">Apakah Anda yakin ingin logout dari sistem SIPANDI?</p>
+          </div>
+          <div class="modal-footer d-flex justify-content-center gap-3">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+              <i class="fas fa-times"></i> Batal
+            </button>
+            <button type="button" class="btn btn-primary px-4" id="confirmLogoutBtn">
+              <i class="fas fa-sign-out-alt"></i> Ya, Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Core Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -763,6 +834,27 @@
                         document.body.classList.remove('dark-mode');
                         localStorage.setItem('darkMode', 'disabled');
                     }
+                });
+            }
+        });
+
+        // Modal Konfirmasi Logout
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutForm = document.getElementById('logoutForm');
+            const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+            let logoutModal;
+
+            if (logoutBtn && logoutForm && confirmLogoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logoutModal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+                    logoutModal.show();
+                });
+
+                confirmLogoutBtn.addEventListener('click', function() {
+                    if (logoutModal) logoutModal.hide();
+                    logoutForm.submit();
                 });
             }
         });
