@@ -401,13 +401,22 @@ class DashboardController extends Controller
     public function getTrafficRiskDetails($month, $level)
     {
         try {
+            $user = Auth::user();
             $sophosService = app(SophosApiService::class);
             $alerts = $sophosService->getAllAlerts();
 
             // Filter alerts by month and risk level
-            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level) {
-                return Carbon::parse($alert['raisedAt'])->format('M') === $month
+            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $level, $user) {
+                $matchesMonthAndLevel = Carbon::parse($alert['raisedAt'])->format('M') === $month
                     && strtolower($alert['severity']) === strtolower($level);
+                
+                // Jika user biasa, filter hanya yang mengandung nama mereka
+                if ($user->role !== 'admin') {
+                    return $matchesMonthAndLevel && 
+                           str_contains(strtolower($alert['description']), strtolower($user->name));
+                }
+                
+                return $matchesMonthAndLevel;
             })->map(function ($alert) {
                 return [
                     'id' => $alert['id'],
@@ -442,11 +451,20 @@ class DashboardController extends Controller
     public function getMonthlyDetails($month)
     {
         try {
+            $user = Auth::user();
             $alerts = $this->sophosApi->getAllAlerts();
 
             // Filter alerts untuk bulan yang dipilih
-            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month) {
-                return Carbon::parse($alert['raisedAt'])->format('M') === $month;
+            $filteredAlerts = collect($alerts)->filter(function ($alert) use ($month, $user) {
+                $matchesMonth = Carbon::parse($alert['raisedAt'])->format('M') === $month;
+                
+                // Jika user biasa, filter hanya yang mengandung nama mereka
+                if ($user->role !== 'admin') {
+                    return $matchesMonth && 
+                           str_contains(strtolower($alert['description']), strtolower($user->name));
+                }
+                
+                return $matchesMonth;
             })->map(function ($alert) {
                 return [
                     'id' => $alert['id'],
@@ -620,13 +638,15 @@ class DashboardController extends Controller
     public function activityLog()
     {
         $user = Auth::user();
-        // Jika admin, tampilkan semua log. Jika user, hanya log milik sendiri.
         if ($user->role === 'admin') {
             $totalUsers = \App\Models\User::count();
             $activeUsers = \App\Models\User::count();
             $todaysLogins = DB::table('activity_logs')
-                ->where('activity', 'like', '%login%')
+                ->where('activity', 'Login')
                 ->whereDate('created_at', now()->toDateString())
+                ->count();
+            $totalLogins = DB::table('activity_logs')
+                ->where('activity', 'Login')
                 ->count();
             $logs = DB::table('activity_logs')
                 ->join('users', 'activity_logs.user_id', '=', 'users.id')
@@ -638,9 +658,13 @@ class DashboardController extends Controller
             $totalUsers = 1;
             $activeUsers = 1;
             $todaysLogins = DB::table('activity_logs')
-                ->where('activity', 'like', '%login%')
+                ->where('activity', 'Login')
                 ->where('user_id', $user->id)
                 ->whereDate('created_at', now()->toDateString())
+                ->count();
+            $totalLogins = DB::table('activity_logs')
+                ->where('activity', 'Login')
+                ->where('user_id', $user->id)
                 ->count();
             $logs = DB::table('activity_logs')
                 ->where('user_id', $user->id)
@@ -648,7 +672,7 @@ class DashboardController extends Controller
                 ->limit(50)
                 ->get();
         }
-        return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins'));
+        return view('activity_log', compact('logs', 'totalUsers', 'activeUsers', 'todaysLogins', 'totalLogins'));
     }
 
     /**

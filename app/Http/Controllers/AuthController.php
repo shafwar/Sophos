@@ -43,6 +43,14 @@ class AuthController extends Controller
             // Regenerasi sesi untuk keamanan
             $request->session()->regenerate();
 
+            // Tambahkan log aktivitas login
+            \DB::table('activity_logs')->insert([
+                'user_id' => $user->id,
+                'activity' => 'Login',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             // Redirect ke dashboard jika berhasil login
             return redirect()->route('dashboard');
         }

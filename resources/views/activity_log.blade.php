@@ -763,50 +763,53 @@
             </div>
 
             <!-- Statistics Cards -->
+            @php $isAdmin = auth()->user()->role === 'admin'; @endphp
             <div class="stats-grid">
-                <!-- Total Users Card -->
-                <div class="stat-card card-success" id="showUserList">
-                    <div class="stat-card-body">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
+                @if($isAdmin)
+                    <!-- Total Users Card -->
+                    <div class="stat-card card-success" id="showUserList">
+                        <div class="stat-card-body">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">{{ $totalUsers }}</h3>
+                                <p class="stat-label">Total Users</p>
+                                <div class="stat-trend">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>12% from last month</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <h3 class="stat-number">{{ $totalUsers }}</h3>
-                            <p class="stat-label">Total Users</p>
-                            <div class="stat-trend">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>12% from last month</span>
+                        <div class="stat-card-footer">
+                            <i class="fas fa-mouse-pointer me-2"></i>Click to view details
+                        </div>
+                    </div>
+
+                    <!-- Active Users Card -->
+                    <div class="stat-card card-info">
+                        <div class="stat-card-body">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 class="stat-number">{{ $activeUsers }}</h3>
+                                <p class="stat-label">Active Users</p>
+                                <div class="stat-trend">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>8% increase</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-progress">
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: {{ $totalUsers > 0 ? ($activeUsers / $totalUsers) * 100 : 0 }}%"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="stat-card-footer">
-                        <i class="fas fa-mouse-pointer me-2"></i>Click to view details
-                    </div>
-                </div>
+                @endif
 
-                <!-- Active Users Card -->
-                <div class="stat-card card-info">
-                    <div class="stat-card-body">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-number">{{ $activeUsers }}</h3>
-                            <p class="stat-label">Active Users</p>
-                            <div class="stat-trend">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>8% increase</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-progress">
-                        <div class="progress">
-                            <div class="progress-bar bg-info" style="width: {{ $totalUsers > 0 ? ($activeUsers / $totalUsers) * 100 : 0 }}%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Today's Logins Card -->
+                <!-- Today's Logins Card (Selalu tampil, tapi untuk user hanya ini yang muncul) -->
                 <div class="stat-card card-primary">
                     <div class="stat-card-body">
                         <div class="stat-icon">
@@ -825,6 +828,25 @@
                         <canvas id="loginChart" width="100" height="40"></canvas>
                     </div>
                 </div>
+
+                @if(!$isAdmin)
+                <!-- Total Logins Card (khusus user) -->
+                <div class="stat-card card-info">
+                    <div class="stat-card-body">
+                        <div class="stat-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ $totalLogins }}</h3>
+                            <p class="stat-label">Total Logins</p>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>Total login to this account</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Activities Section -->
