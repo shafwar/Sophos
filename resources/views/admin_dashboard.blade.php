@@ -946,9 +946,9 @@
                             <li><a class="dropdown-item" href="{{ route('profile.show') }}"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                                     @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
+                                    <button type="button" class="dropdown-item text-danger" id="logoutBtn">
                                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                                     </button>
                                 </form>
@@ -2328,4 +2328,47 @@
             });
             doc.save(fileName);
         };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutForm = document.getElementById('logoutForm');
+            const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+            let logoutModal;
+
+            if (logoutBtn && logoutForm && confirmLogoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logoutModal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+                    logoutModal.show();
+                });
+
+                confirmLogoutBtn.addEventListener('click', function() {
+                    if (logoutModal) logoutModal.hide();
+                    logoutForm.submit();
+                });
+            }
+        });
     </script>
+
+    <!-- Modal Konfirmasi Logout -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header" style="background: linear-gradient(90deg, #1b258f 80%, #4fc3f7 100%); color: #fff;">
+            <h5 class="modal-title" id="logoutConfirmModalLabel"><i class="fas fa-sign-out-alt me-2"></i>Konfirmasi Logout</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-0" style="font-size:1.1rem; color:#1b258f; font-weight:500;">Apakah Anda yakin ingin logout dari sistem SIPANDI?</p>
+          </div>
+          <div class="modal-footer d-flex justify-content-center gap-3">
+            <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">
+              <i class="fas fa-times"></i> Batal
+            </button>
+            <button type="button" class="btn btn-primary px-4" id="confirmLogoutBtn">
+              <i class="fas fa-sign-out-alt"></i> Ya, Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
